@@ -1,0 +1,185 @@
+
+#' @importFrom stats complete.cases
+#' @importFrom methods is
+
+# error checks for function parameters
+
+check_diagram <- function(d,ret){
+
+  # error checks for a diagram d stored as a data frame, and conversion
+  if((is.list(d) && ((length(d) == 1 && all(names(d) %in% "diagram") && methods::is(d$diagram,"diagram")) || ((length(d) == 4 && all(names(d) %in% c("diagram","birthLocation","deathLocation","cycleLocation")) && methods::is(d$diagram,"diagram"))))) || (methods::is(d,"matrix") && methods::is(d,"array") & all(colnames(d) %in% c("dimension","birth","death"))))
+  {
+    # d is the output from a TDA/TDAstats calculation
+    d <- diagram_to_df(d)
+  }else
+  {
+    if(!methods::is(d,"data.frame"))
+    {
+      stop("Diagrams must either be the output of a TDA/TDAstats computation or a data frame.")
+    }
+  }
+
+  if(nrow(d) == 0)
+  {
+    stop("Every diagram must be non-empty.")
+  }
+
+  if(ncol(d) != 3)
+  {
+    stop("Every diagram must have three columns.")
+  }
+
+  if(!methods::is(d[,1],"numeric") | !methods::is(d[,2],"numeric") | !methods::is(d[,3],"numeric"))
+  {
+    stop("Diagrams must have numeric columns.")
+  }
+
+  if(!all.equal(d[,1],as.integer(d[,1])))
+  {
+    stop("Homology dimensions must be whole numbers.")
+  }
+
+  if(length(which(d[,1] < 0)) > 0)
+  {
+    stop("Homology dimensions must be >= 0.")
+  }
+
+  if(length(which(d[,2] < 0)) > 0 | length(which(d[,3] < 0)) > 0)
+  {
+    stop("Birth and death radii must be >= 0.")
+  }
+
+  if(length(which(stats::complete.cases(d))) != nrow(d))
+  {
+    stop("Diagrams can't have missing values.")
+  }
+  
+  if(length(which(d[,3] < d[,2])) > 0)
+  {
+    stop("Death values must always be at least as large as birth values.")
+  }
+  
+  if(ret == T)
+  {
+    return(d) 
+  }
+
+}
+
+all_diagrams <- function(diagram_groups,inference){
+
+  # function to make sure all diagram groups are lists or vectors of diagrams,
+  # to convert the diagrams to data frames and to error check each diagram.
+  # diagram_groups is a vector or list of vectors or lists of diagrams
+  # inference is a string, either 'difference' for the permutation test or
+  # 'independence' for the independence test
+  
+  if(inference == "difference")
+  {
+    # compute cumulative sums of groups lengths in order to correctly compute diagram indices
+    csum_group_sizes <- cumsum(unlist(lapply(diagram_groups,FUN = length)))
+    csum_group_sizes <- c(0,csum_group_sizes)
+  }
+  
+  # loop through all diagram groups
+  for(g in 1:length(diagram_groups))
+  {
+    # loop through each diagram in each group
+    for(diag in 1:length(diagram_groups[[g]]))
+    {
+      # check to make sure each diagram is actually the output of some TDA/TDAstats computation or a data frame
+      diagram_groups[[g]][[diag]] <- check_diagram(diagram_groups[[g]][[diag]],ret = T)
+      # if of the right form, format into a data frame and store diagram index for difference inference
+      if(inference == "difference")
+      {
+        diagram_groups[[g]][[diag]] <- list(diag = diagram_groups[[g]][[diag]],
+                                            ind = csum_group_sizes[g] + diag)
+      }
+    }
+  }
+  
+  # return diagram groups with reformatted diagrams
+  return(diagram_groups)
+  
+}
+
+check_param <- function(param_name,param,numeric = T,multiple = F,whole_numbers = F,finite = T,at_least_one = F,positive = F,non_negative = T,min_length = 1){
+  
+  # check if a single parameter satisfies certain constraints
+  if(!is.list(param) & (!is.vector(param) | length(param) == 1))
+  {
+    if(is.null(param))
+    {
+      stop(paste0(param_name," must not be NULL."))
+    }
+    if(is.na(param))
+    {
+      stop(paste0(param_name," must not be NA/NaN."))
+    }
+  }
+  
+  if(param_name == "diagrams" | param_name == "other_diagrams" | param_name == "diagram_groups" | param_name == "new_diagrams")
+  {
+    if(!is.list(param) | length(param) < min_length)
+    {
+      stop(paste0(param_name," must be a list of persistence diagrams of length at least ",min_length,"."))
+    }
+    return()
+  }
+  
+  if(multiple == F & length(param) > 1)
+  {
+    stop(paste0(param_name," must be a single value."))
+  }
+  
+  if(param_name == "distance")
+  {
+    if(is.null(param) | length(param) > 1 | (param %in% c("wasserstein","fisher")) == F)
+    {
+      stop("distance must either be \'wasserstein\' or \'fisher\'.")
+    }
+    return()
+  }
+  
+  if(numeric == T)
+  {
+    if(is.numeric(param) == F)
+    {
+      stop(paste0(param_name," must be numeric."))
+    }
+  }else
+  {
+    if(is.logical(param) == F)
+    {
+      stop(paste0(param_name," must be T or F."))
+    }
+    
+    return()
+  }
+  
+  if(numeric == T & whole_numbers == T & length(which(floor(param) != param)) > 0)
+  {
+    stop(paste0(param_name," must be whole numbers."))
+  }
+  
+  if(finite == T & length(which(!is.finite(param))) > 0)
+  {
+    stop(paste0(param_name," must be finite."))
+  }
+  
+  if(non_negative == T & length(which(param < 0)) > 0)
+  {
+    stop(paste0(param_name," must be non-negative"))
+  }
+  
+  if(positive == T & length(which(param <= 0)) > 0)
+  {
+    stop(paste0(param_name," must be positive."))
+  }
+  
+  if(at_least_one == T & length(which(param < 1)) > 0)
+  {
+    stop(paste0(param_name," must be at least one."))
+  }
+  
+}
