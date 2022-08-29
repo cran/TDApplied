@@ -1,6 +1,6 @@
-99e51622be56e5824da19e7490e59d6e *DESCRIPTION
+3d5e387b982d9f79498731ec99e8d49a *DESCRIPTION
 6c59286c48ad68dc31c41f040f481e23 *NAMESPACE
-37b7f4651f7aac5a4fc549c820ee9fa4 *NEWS.md
+0b32cc75717bafe03e2e103614fd5845 *NEWS.md
 7912238e1ff1e5e894af293f88c4a70c *R/TDApplied.R
 0ee41d696a098067b04bdd51a57348ef *R/convert.R
 7d04f8a8fecfde1099fc20af922f1e61 *R/distance_calculations.R
@@ -9,11 +9,11 @@
 02d3dd66e7f91d67ef9282db35c46d25 *R/machine_learning.R
 400fdb7f69dec9a2fde57b7c577fa2ac *R/utilities.R
 db2deb37952f55ada23544a63c1f6769 *README.md
-90f12118fb3acf2983ade24b9e3bf3f8 *build/partial.rdb
+932b94bca1372e3b99c583d4f07e5097 *build/partial.rdb
 635a49ad8db6f6c500c05caceff52351 *build/vignette.rds
 14369ebe160a16439f14656b6e7abba0 *inst/doc/ML_and_Inference.R
 c093782eaeea638b52cf55827eeaec05 *inst/doc/ML_and_Inference.Rmd
-c050774009853f008d703039ef6fa6e8 *inst/doc/ML_and_Inference.html
+d157b314cbb76d2368edd355dca4ebb0 *inst/doc/ML_and_Inference.html
 a8ebfa8ccbc3c5bd22556fa01bb85c26 *man/TDApplied.Rd
 6dd7f59fe1ea4a49eb9b986fa9e56f27 *man/diagram_distance.Rd
 d2950d8a08425d68747c3f619c768e4e *man/diagram_kernel.Rd
@@ -31,7 +31,7 @@ fa1cbe4926edae0dd8945e3f0ef02d52 *man/predict_diagram_kkmeans.Rd
 3b63c0cd566ab02f8fc4a56575ee09f7 *man/predict_diagram_kpca.Rd
 179863dd35c39e6a5d2d46cadc27af15 *man/predict_diagram_ksvm.Rd
 7b1861b65cc62a92b2cd137489997a0b *tests/testthat.R
-94463f95c270727c2fc898a7061d7442 *tests/testthat/test-MDS.R
+443de92a0fe89f3d0c6c5be5a93863de *tests/testthat/test-MDS.R
 9573b8edb5e5c605946d9e74327ea533 *tests/testthat/test-convert.R
 d0899f2bdb0c0ae02104fce574f36e06 *tests/testthat/test-distance.R
 a21ffc5b1189acd74186755a1dbd3be3 *tests/testthat/test-inference.R

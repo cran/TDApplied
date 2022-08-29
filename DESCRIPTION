@@ -1,7 +1,7 @@
 Package: TDApplied
 Type: Package
 Title: Machine Learning and Inference for Topological Data Analysis
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Shael", "Brown", email = "shaelebrown@gmail.com", role = c("aut","cre")),
              person("Dr. Reza", "Farivar", email = "reza.farivar@mcgill.ca", role = c("aut","fnd")))
 Author: Shael Brown [aut, cre],
@@ -29,6 +29,6 @@ RoxygenNote: 7.1.2
 Suggests: rmarkdown, knitr, testthat (>= 3.0.0), TDA, TDAstats
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Packaged: 2022-08-12 15:04:40 UTC; jibaccount
+Packaged: 2022-08-24 16:21:13 UTC; jibaccount
 Repository: CRAN
-Date/Publication: 2022-08-15 08:40:02 UTC
+Date/Publication: 2022-08-29 08:00:02 UTC
