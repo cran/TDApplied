@@ -3,7 +3,7 @@ test_that("diagram_mds detects incorrect parameters correctly",{
   
   D <- data.frame(dimension = c(0),birth = c(0),death = c(1))
   expect_error(diagram_mds(diagrams = list(D,D,"D"),num_workers = 2),"Diagrams")
-  expect_error(diagram_mds(diagrams = list(),num_workers = 2),"1")
+  expect_error(diagram_mds(diagrams = list(),num_workers = 2),"2")
   expect_error(diagram_mds(diagrams = list(D,D,D),distance = NaN,num_workers = 2),"distance")
   expect_error(diagram_mds(diagrams = list(D,D,D),distance = "fisher",sigma = NULL,num_workers = 2),"sigma")
   expect_error(diagram_mds(diagrams = list(D,D,D),p = NaN,num_workers = 2),"p")
@@ -28,11 +28,19 @@ test_that("diagram_mds is computing correctly",{
   dmds <- diagram_mds(diagrams = list(D1,D2,D3),num_workers = 2)
   if(embedding[1,1] < 0)
   {
-    embedding <- embedding/-1
+    embedding[,1] <- embedding[,1]/-1
   }
   if(dmds[1,1] < 0)
   {
-    dmds <- dmds/-1
+    dmds[,1] <- dmds[,1]/-1
+  }
+  if(embedding[1,2] < 0)
+  {
+    embedding[,2] <- embedding[,2]/-1
+  }
+  if(dmds[1,2] < 0)
+  {
+    dmds[,2] <- dmds[,2]/-1
   }
   expect_equal(dmds,embedding)
   
