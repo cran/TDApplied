@@ -11,11 +11,11 @@ diagram_kpca(
   sigma = 1,
   features = 1,
   num_workers = parallelly::availableCores(omit = 1),
-  th = 1e-04
+  th = 0.0001
 )
 }
 \arguments{
-\item{diagrams}{a list of persistence diagrams which are either the output of a TDA/TDAstats calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}, or \code{\link{diagram_to_df}}.}
+\item{diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
 \item{dim}{the non-negative integer homological dimension in which the distance is to be computed, default 0.}
 

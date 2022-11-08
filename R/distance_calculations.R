@@ -1,8 +1,9 @@
 #### DIAGRAM DISTANCE METRICS ####
 #' Calculate distance between a pair of persistence diagrams.
 #'
-#' Calculates the distance between a pair of persistence diagrams in a particular homological dimension,
-#' either the output from a \code{\link{diagram_to_df}} function call or from a TDA/TDAstats homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}.
+#' Calculates the distance between a pair of persistence diagrams, either the output from a \code{\link{diagram_to_df}} function call
+#' or from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}},
+#' in a particular homological dimension.
 #'
 #' The most common distance calculations between persistence diagrams
 #' are the wasserstein and bottleneck distances, both of which "match" points between
@@ -14,8 +15,8 @@
 #' (\url{https://proceedings.neurips.cc/paper/2018/file/959ab9a0695c467e7caf75431a872e5c-Paper.pdf}).
 #' If the `distance` parameter is "fisher" then `sigma` must not be NULL.
 #'
-#' @param D1 the first persistence diagram, either computed from a TDA/TDAstats function like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}, or such an object converted to a data frame with \code{\link{diagram_to_df}}.
-#' @param D2 the second persistence diagram, either computed from TDA/TDAstats function like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}, or such an object converted to a data frame with \code{\link{diagram_to_df}}.
+#' @param D1 the first persistence diagram.
+#' @param D2 the second persistence diagram.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param p  a number representing the wasserstein power parameter, at least 1 and default 2.
 #' @param distance a string which determines which type of distance calculation to carry out, either "wasserstein" (default) or "fisher".
@@ -94,9 +95,15 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
   }
 
   # remove diagonal entries from D1_subset and D2_subset
-  D1_subset <- D1_subset[which(D1_subset[,1] != D1_subset[,2]),]
-  D2_subset <- D2_subset[which(D2_subset[,1] != D2_subset[,2]),]
-
+  if(nrow(D1_subset) > 0)
+  {
+    D1_subset <- D1_subset[which(D1_subset[,1] != D1_subset[,2]),]
+  }
+  if(nrow(D2_subset) > 0)
+  {
+    D2_subset <- D2_subset[which(D2_subset[,1] != D2_subset[,2]),]
+  }
+  
   # for each non-trivial element in D1_subset we add its projection onto the diagonal in diag1
   if(nrow(D1_subset) > 0)
   {
@@ -116,6 +123,55 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
       diag2 <- rbind(diag2,data.frame(birth = proj_diag,death = proj_diag))
     }
   }
+  
+  # check if either subset is empty, if so return the norm of the other diagram
+  if(distance == "wasserstein")
+  {
+    if(nrow(diag1) == 0)
+    {
+      if(is.infinite(p))
+      {
+        # bottleneck norm
+        return(max(unlist(lapply(X = 1:nrow(D2_subset),FUN = function(X){
+          
+          coord <- (D2_subset[X,1L] + D2_subset[X,2L])/2
+          return(max(c(D2_subset[X,2L] - coord,coord - D2_subset[X,1L])))
+          
+        }))))
+      }else
+      {
+        # wasserstein norm
+        return((sum(unlist(lapply(X = 1:nrow(D2_subset),FUN = function(X){
+          
+          coord <- (D2_subset[X,1L] + D2_subset[X,2L])/2
+          return(max(c(D2_subset[X,2L] - coord,coord - D2_subset[X,1L]))^p)
+          
+        }))))^(1/p))
+      }
+    }
+    if(nrow(diag2) == 0)
+    {
+      if(is.infinite(p))
+      {
+        # bottleneck norm
+        return(max(unlist(lapply(X = 1:nrow(D1_subset),FUN = function(X){
+          
+          coord <- (D1_subset[X,1L] + D1_subset[X,2L])/2
+          return(max(c(D1_subset[X,2L] - coord,coord - D1_subset[X,1L])))
+          
+        }))))
+      }else
+      {
+        # wasserstein norm
+        return((sum(unlist(lapply(X = 1:nrow(D1_subset),FUN = function(X){
+          
+          coord <- (D1_subset[X,1L] + D1_subset[X,2L])/2
+          return(max(c(D1_subset[X,2L] - coord,coord - D1_subset[X,1L]))^p)
+          
+        }))))^(1/p))
+      }
+    }
+  }
 
   # since an element b of D1_subset is either matched to an element of D2 or to the projection of b onto the diagonal
   # we form the two sets to be matched by row binding D1_subset with diag2 and D2_subset with diag1
@@ -126,6 +182,11 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
   {
     # compute the bottleneck distance matrix between rows of D1_subset and D2_subset
     dist_mat <- as.matrix(rdist::cdist(D1_subset,D2_subset,metric = "maximum"))
+    dist_mat[(nrow(D1_subset) - nrow(diag2) + 1):nrow(D1_subset),(nrow(D2_subset) - nrow(diag1) + 1):nrow(D2_subset)] <- 0
+    if(is.finite(p))
+    {
+      dist_mat <- dist_mat^p
+    }
     
     # use the Hungarian algorithm from the clue package to find the minimal weight matching
     best_match <- as.numeric(clue::solve_LSAP(x = dist_mat,maximum = F))
@@ -138,7 +199,7 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
     # if p is finite, exponentiate each matched distance and take the p-th root of their sum
     if(is.finite(p))
     {
-      return((sum(dist_mat[indices]^(p)))^(1/p))
+      return(sum(dist_mat[indices])^(1/p))
     }
     
     # otherwise, return the regular bottleneck distance
@@ -207,7 +268,7 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
 #' \code{\link{diagram_mds}}, \code{\link{permutation_test}} and \code{\link{diagram_ksvm}} functions. 
 #' If `distance` is "fisher" then `sigma` must not be NULL.
 #'
-#' @param diagrams a list of persistence diagrams, either the output of TDA/TDAstats calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}, or \code{\link{diagram_to_df}}.
+#' @param diagrams a list of persistence diagrams, either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param other_diagrams either NULL (default) or another list of persistence diagrams to compute a cross-distance matrix.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param distance a character determining which metric to use, either "wasserstein" (default) or "fisher".
