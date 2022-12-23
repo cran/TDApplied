@@ -7,6 +7,7 @@ test_that("diagram_kkmeans detects incorrect parameters correctly",{
   expect_error(diagram_kkmeans(diagrams = list(D,D,D),centers = 1,t = NaN,num_workers = 2),"t")
   expect_error(diagram_kkmeans(diagrams = list(D,D,D),centers = 1,sigma = NA,num_workers = 2),"sigma")
   expect_error(diagram_kkmeans(diagrams = list(D,D,D),dim = c(1,2),centers = 1,num_workers = 2),"single value")
+  expect_error(diagram_kkmeans(diagrams = list(D,D,D),dim = c(1),centers = 4,num_workers = 2),"number of")
   
 })
 
@@ -99,6 +100,8 @@ test_that("diagram_kkmeans is computing correctly",{
 
 test_that("diagram_kkmeans can accept inputs from TDA, TDAstats and diagram_to_df",{
   
+  skip_on_cran()
+  
   D1 = TDA::ripsDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxscale = 1,maxdimension = 1)
   D2 = TDA::alphaComplexDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxdimension = 1)
   D3 = TDA::ripsDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxscale = 1,maxdimension = 1,library = "dionysus",location = T)
@@ -144,8 +147,9 @@ test_that("predict_diagram_kkmeans detects incorrect parameters correctly",{
   dkk <- diagram_kkmeans(diagrams = diagrams,centers = 2,dim = 1,num_workers = 2)
   expect_error(predict_diagram_kkmeans(new_diagrams = list(),dkk,num_workers = 2),"1")
   expect_error(predict_diagram_kkmeans(new_diagrams = "D",dkk,num_workers = 2),"list")
-  expect_error(predict_diagram_kkmeans(new_diagrams = list(diagrams[[1]],diagrams[[2]][0,]),dkk,num_workers = 2),"empty")
+  # expect_error(predict_diagram_kkmeans(new_diagrams = list(diagrams[[1]],diagrams[[2]][0,]),dkk,num_workers = 2),"empty")
   expect_error(predict_diagram_kkmeans(new_diagrams = diagrams,diagrams,num_workers = 2),"kkmeans")
+  expect_error(predict_diagram_kkmeans(new_diagrams = diagrams,NULL,num_workers = 2),"NULL")
   
 })
 
@@ -188,6 +192,8 @@ test_that("predict_diagram_kkmeans is computing correctly",{
 })
 
 test_that("predict_diagram_kkmeans can accept inputs from TDA, TDAstats and diagram_to_df",{
+  
+  skip_on_cran()
   
   D1 = TDA::ripsDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxscale = 1,maxdimension = 1)
   D2 = TDA::alphaComplexDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxdimension = 1)

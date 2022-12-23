@@ -54,6 +54,7 @@ test_that("predict_diagram_kpca detects incorrect parameters correctly",{
   expect_error(predict_diagram_kpca(new_diagrams = NA,kpca,num_workers = 2),"NA")
   expect_error(predict_diagram_kpca(new_diagrams = list(diagrams[[1]],1),kpca,num_workers = 2),"TDA/TDAstats")
   expect_error(predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = 2,num_workers = 2),"kpca")
+  expect_error(predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = NULL,num_workers = 2),"supplied")
   
 })
 
@@ -68,6 +69,8 @@ test_that("predict_diagram_kpca is computing correctly",{
 })
 
 test_that("predict_diagram_kpca can accept inputs from TDA, TDAstats and diagram_to_df",{
+  
+  skip_on_cran()
   
   D1 <- data.frame(dimension = 1,birth = 2,death = 3)
   D2 <- data.frame(dimension = 1,birth = 2,death = 3.1)
