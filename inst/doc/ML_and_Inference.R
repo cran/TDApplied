@@ -9,7 +9,16 @@ original_mfrow <- par()$mfrow
 original_xpd <- par()$xpd
 original_mar <- par()$mar
 original_scipen <- options()$scipen
+if(exists(".Random.seed", .GlobalEnv) == F)
+{
+  runif(1)
+}
+oldseed <- get(".Random.seed", .GlobalEnv)
+oldRNGkind <- RNGkind()
+
+# set some new parameters for viewing and reproducibility
 options(scipen = 999)
+set.seed(123)
 
 ## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center'---------------
 circ <- TDA::circleUnif(n = 50,r = 1)
@@ -794,4 +803,6 @@ graphics::mtext("Cluster label",cex=2)
 # reset parameters
 par(mfrow = original_mfrow,xpd = original_xpd,mar = original_mar)
 options(scipen = original_scipen)
+do.call("RNGkind",as.list(oldRNGkind))
+assign(".Random.seed", oldseed, .GlobalEnv)
 
