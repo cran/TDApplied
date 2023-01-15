@@ -61,7 +61,6 @@ par(mfrow = c(1,1))
 
 ## ----setup--------------------------------------------------------------------
 library("TDApplied")
-#devtools::load_all()
 
 ## ----echo = T,fig.height = 3,fig.width = 7,fig.align = 'center'---------------
 D1 = data.frame(dimension = c(0),birth = c(2),death = c(3))
