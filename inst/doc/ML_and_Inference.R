@@ -20,7 +20,7 @@ oldRNGkind <- RNGkind()
 options(scipen = 999)
 set.seed(123)
 
-## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center'---------------
+## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center',eval = requireNamespace("TDA")----
 circ <- TDA::circleUnif(n = 50,r = 1)
 par(mfrow = c(1,4))
 plot(x = circ[,1],y = circ[,2],main = "Approximation 1:\nindividual data points",xlab = "",ylab = "",las = 1)
@@ -227,7 +227,7 @@ perm_test <- permutation_test(g1,g2,g3,
                               dims = c(0))
 perm_test$p_values
 
-## ----echo = F,fig.height = 5,fig.width = 5,fig.align = 'center'---------------
+## ----echo = F,fig.height = 5,fig.width = 5,fig.align = 'center',eval = requireNamespace("TDAstats") & requireNamespace("TDA")----
 par(mfrow = c(1,1))
 D <- TDAstats::calculate_homology(mat = TDA::circleUnif(n = 50),dim = 1,threshold = 2)
 pt <- as.numeric(D[which(D[,1L] == 1),])[2:3]
@@ -237,7 +237,7 @@ graphics::lines(x = c(pt[[1]],pt[[1]] + 0.3953059),y = c(pt[[2]],pt[[2]]))
 graphics::lines(x = c(pt[[1]],pt[[1]]),y = c(pt[[2]],pt[[2]] - 0.3953059))
 graphics::text(x = c(pt[[1]] + 0.3953059/2,0.4),y = c(1.83,1.55),c("t","t"))
 
-## ----fig.height = 4,fig.width = 8,fig.align = 'center'------------------------
+## ----fig.height = 4,fig.width = 8,fig.align = 'center',eval = requireNamespace("TDA")----
 # sample 50 points from the unit circle
 circle <- TDA::circleUnif(n = 50)
 
