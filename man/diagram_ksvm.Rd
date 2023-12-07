@@ -10,8 +10,10 @@ diagram_ksvm(
   dim,
   t = 1,
   sigma = 1,
+  rho = NULL,
   y,
   type = NULL,
+  distance_matrices = NULL,
   C = 1,
   nu = 0.2,
   epsilon = 0.1,
@@ -27,17 +29,21 @@ diagram_ksvm(
 \arguments{
 \item{diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
-\item{cv}{a positive number at most the length of `diagrams` which determines the number of cross validation splits to be performed (default 1, aka no cross-validation).}
+\item{cv}{a positive number at most the length of `diagrams` which determines the number of cross validation splits to be performed (default 1, aka no cross-validation). If `prob.model` is TRUE then cv is set to 1 since kernlab performs 3-fold CV internally in this case. When performing classification, classes are balanced within each cv fold.}
 
 \item{dim}{a non-negative integer vector of homological dimensions in which the model is to be fit.}
 
-\item{t}{a vector of positive numbers representing the grid of values for the scale of the persistence Fisher kernel, default 1.}
+\item{t}{either a vector of positive numbers representing the grid of values for the scale of the persistence Fisher kernel or NULL, default 1. If NULL then t is selected automatically, see details.}
 
-\item{sigma}{a vector of positive numbers representing the grid of values for the bandwidth of the Fisher information metric, default 1}
+\item{sigma}{a vector of positive numbers representing the grid of values for the bandwidth of the Fisher information metric, default 1.}
 
-\item{y}{a response vector with one label for each persistence diagram. Must be either numeric or factor.}
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, distance matrix calculations are sequential.}
 
-\item{type}{a string representing the type of task to be performed.}
+\item{y}{a response vector with one label for each persistence diagram. Must be either numeric or factor, but doesn't need to be supplied when `type` is "one-svc".}
+
+\item{type}{a string representing the type of task to be performed. Can be any one of "C-svc","nu-svc","one-svc","eps-svr","nu-svr" - default for regression is "eps-svr" and for classification is "C-svc". See \code{\link[kernlab]{ksvm}} for details.}
+
+\item{distance_matrices}{an optional list of precomputed Fisher distance matrices, corresponding to the rows in `expand.grid(dim = dim,sigma = sigma)`, default NULL.}
 
 \item{C}{a number representing the cost of constraints violation (default 1) this is the 'C'-constant of the regularization term in the Lagrange formulation.}
 
@@ -60,21 +66,15 @@ diagram_ksvm(
 \item{num_workers}{the number of cores used for parallel computation, default is one less the number of cores on the machine.}
 }
 \value{
-a list containing the elements
+a list of class 'diagram_ksvm' containing the elements
 
 \describe{
 
-\item{models}{the cross-validation results - a matrix storing the parameters for each model in the tuning grid and its mean cross-validation error over all splits.}
+\item{cv_results}{the cross-validation results - a matrix storing the parameters for each model in the tuning grid and its mean cross-validation error over all splits.}
 
-\item{best_model}{the output of \code{\link[kernlab]{ksvm}} run on the whole dataset with the optimal model parameters found during cross-validation. See the help page for \code{\link[kernlab]{ksvm}} for more details about this object.}
+\item{best_model}{a list containing the output of \code{\link[kernlab]{ksvm}} run on the whole dataset with the optimal model parameters found during cross-validation, as well as the optimal kernel parameters for the model.}
 
-\item{diagrams}{the diagrams which were support vectors in the `best_model`. These are used for downstream prediction.}
-
-\item{dim}{the input `dim` argument.}
-
-\item{t}{the input `t` argument.}
-
-\item{sigma}{the input `sigma` argument.}
+\item{diagrams}{the diagrams which were supplied in the function call.}
 
 }
 }
@@ -89,7 +89,13 @@ written as \eqn{d_{PF}(D_1,D_2)=exp(t*d_{FIM}(D_1,D_2))=exp(d_{FIM}(D_1,D_2))^t}
 store the Fisher information metric distance matrix for each sigma value in the parameter grid to avoid
 recomputing distances, and cross validation is therefore performed in parallel. 
 Note that the response parameter `y` must be a factor for classification - 
-a character vector for instance will throw an error.
+a character vector for instance will throw an error. If `t` is NULL then 1/`t` is selected as
+the 1,2,5,10,20,50 percentiles of the upper triangle of the distance matrix of its training sample (per fold in the case of cross-validation). 
+This is the process suggested in the persistence Fisher kernel paper. If
+any of these values would divide by 0 (i.e. if the training set is small) then the minimum non-zero element
+is taken as the denominator (and hence the returned parameters may have duplicate rows except for differing error values). If
+cross-validation is performed then the mean error across folds is still recorded, but the best `t` parameter
+across all folds is recorded in the cv results table.
 }
 \examples{
 
@@ -111,6 +117,12 @@ if(require("TDA") & require("TDAstats"))
 
   # fit model without cross validation
   model_svm <- diagram_ksvm(diagrams = g,cv = 1,dim = c(0),
+                            y = y,sigma = c(1),t = c(1),
+                            num_workers = 2)
+                            
+  # repeat with precomputed distance matrix, gives same result but much faster
+  D <- distance_matrix(diagrams = g,sigma = 1,distance = "fisher",num_workers = 2)
+  model_svm <- diagram_ksvm(diagrams = g,distance_matrices = list(D),cv = 1,dim = c(0),
                             y = y,sigma = c(1),t = c(1),
                             num_workers = 2)
 }

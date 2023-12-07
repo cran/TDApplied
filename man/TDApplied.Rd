@@ -3,18 +3,32 @@
 \docType{package}
 \name{TDApplied}
 \alias{TDApplied}
+\alias{_PACKAGE}
+\alias{TDApplied-package}
 \title{Machine learning and inference for persistence diagrams}
 \description{
 Topological data analysis is a powerful tool for finding non-linear global structure
-in whole datasets. 'TDApplied' aims to bridge topological data analysis with data, statistical
-and machine learning practitioners so that more analyses may benefit from the
-power of topological data analysis. The main tool of topological data analysis is
-persistent homology, which computes a shape descriptor of a dataset, called
-a persistence diagram. There are five goals of this package: (1) deliver a fast implementation
-of persistent homology via a python interface, (2) convert persistence diagrams
-computed using the two main R packages for topological data analysis into a data frame, 
-(3) implement fast versions of both distance and kernel calculations
-for pairs of persistence diagrams, (4) contribute tools for the interpretation of
-persistence diagrams, and (5) provide parallelized methods for machine learning
-and inference for persistence diagrams.
+in whole datasets. The main tool of topological data analysis is persistent homology, which computes
+a topological shape descriptor of a dataset called a persistence diagram. 'TDApplied' provides 
+useful and efficient methods for analyzing groups of persistence diagrams with machine learning and statistical inference,
+and these functions can also interface with other data science packages to form flexible and integrated
+topological data analysis pipelines.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/shaelebrown/TDApplied}
+  \item Report bugs at \url{https://github.com/shaelebrown/TDApplied/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Shael Brown \email{shaelebrown@gmail.com}
+
+Authors:
+\itemize{
+  \item Dr. Reza Farivar \email{reza.farivar@mcgill.ca} [funder]
+}
+
+}
+\keyword{internal}

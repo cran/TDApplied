@@ -1,19 +1,18 @@
 
 #' @importFrom stats complete.cases
-#' @importFrom methods is
 
 # error checks for function parameters
 
 check_diagram <- function(d,ret){
 
   # error checks for a diagram d stored as a data frame, and conversion
-  if((is.list(d) && ((length(d) == 1 && all(names(d) %in% "diagram") && (methods::is(d$diagram,"diagram")) || methods::is(d$diagram,"data.frame")) || ((length(d) == 4 && all(names(d) %in% c("diagram","birthLocation","deathLocation","cycleLocation")) && methods::is(d$diagram,"diagram"))))) || (methods::is(d,"matrix") && methods::is(d,"array") & all(colnames(d) %in% c("dimension","birth","death"))))
+  if((is.list(d) && ((length(d) == 1 && all(names(d) %in% "diagram") && (inherits(d$diagram,"diagram")) || inherits(d$diagram,"data.frame")) || ((length(d) == 4 && all(names(d) %in% c("diagram","birthLocation","deathLocation","cycleLocation")) && inherits(d$diagram,"diagram"))))) || (inherits(d,"matrix") && inherits(d,"array") & all(colnames(d) %in% c("dimension","birth","death"))))
   {
     # d is the output from a TDA/TDAstats calculation
     d <- diagram_to_df(d)
   }else
   {
-    if(!methods::is(d,"data.frame"))
+    if(!inherits(d,"data.frame"))
     {
       stop("Diagrams must either be the output of a TDA/TDAstats computation or a data frame.")
     }
@@ -29,7 +28,7 @@ check_diagram <- function(d,ret){
     stop("Every diagram must have three columns.")
   }
 
-  if(!methods::is(d[,1L],"numeric") | !methods::is(d[,2L],"numeric") | !methods::is(d[,3L],"numeric"))
+  if(!is.numeric(d[,1L]) | !is.numeric(d[,2L]) | !is.numeric(d[,3L]))
   {
     stop("Diagrams must have numeric columns.")
   }
@@ -54,9 +53,9 @@ check_diagram <- function(d,ret){
     stop("Diagrams can't have missing values.")
   }
   
-  if(length(which(d[,3L] < d[,2L])) > 0)
+  if(length(which(d[,3L] <= d[,2L])) > 0)
   {
-    stop("Death values must always be at least as large as birth values.")
+    stop("Death values must always be larger than birth values.")
   }
   
   # if(length(which(is.infinite(d[,3L]))) > 0)
@@ -209,3 +208,84 @@ check_param <- function(param_name,param,...){
   }
   
 }
+
+#' @importFrom stats complete.cases
+
+check_matrix <- function(M,name,type = "kernel",symmetric = T){
+  
+  if(type == "kernel")
+  {
+    if(inherits(M,"kernelMatrix") == F)
+    {
+      stop(paste0(name," must be of type kernelMatrix."))
+    }
+  }else
+  {
+    if(inherits(M,"matrix") == F)
+    {
+      stop(paste0(name," must be of type matrix."))
+    }
+  }
+  
+  if(nrow(M)*ncol(M) == 0)
+  {
+    stop(paste0(name," must have at least one row and column."))
+  }
+
+  if(length(which(stats::complete.cases(M) == F)) > 0)
+  {
+    stop(paste0(name," must not have missing values."))
+  }
+  
+  if(symmetric == T)
+  {
+    if(type == "kernel")
+    {
+      if(length(which(diag(M) != rep(1,ncol(M)))) > 0)
+      {
+        stop(paste0(name," must have 1's on its diagonal."))
+      }
+    }else
+    {
+      if(length(which(diag(M) != rep(0,ncol(M)))) > 0)
+      {
+        stop(paste0(name," must have 0's on its diagonal."))
+      }
+    }
+    
+    if(nrow(M) != ncol(M))
+    {
+      stop(paste0(name," must have the same number of rows and columns."))
+    }
+    
+    if(type == "kernel")
+    {
+      class(M) = "matrix"
+    }
+    if(isSymmetric(M) == F)
+    {
+      stop(paste0(name," must be symmetric."))
+    }
+    if(type == "kernel")
+    {
+      class(M) = "kernelMatrix"
+    } 
+  }
+  
+}
+
+# function for cv in diagram_ksvm
+# copied from kernlab package v0.9-29
+.classAgreement <- function (tab) {
+  n <- sum(tab)
+  if (!is.null(dimnames(tab))) {
+    lev <- intersect(colnames(tab), rownames(tab))
+    p0 <- sum(diag(tab[lev, lev])) / n
+  } else {
+    m <- min(dim(tab))
+    p0 <- sum(diag(tab[1:m, 1:m])) / n
+  }
+  return(p0)
+}
+
+

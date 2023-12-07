@@ -6,11 +6,13 @@
 \usage{
 diagram_mds(
   diagrams,
+  D = NULL,
   k = 2,
   distance = "wasserstein",
   dim = 0,
   p = 2,
   sigma = NULL,
+  rho = NULL,
   eig = FALSE,
   add = FALSE,
   x.ret = FALSE,
@@ -19,9 +21,11 @@ diagram_mds(
 )
 }
 \arguments{
-\item{diagrams}{a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
+\item{diagrams}{a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `diagrams` and `D` need to be supplied.}
 
-\item{k}{the dimension of the space which the data are to be represented in; must be in {1,2,...,n-1}.}
+\item{D}{an optional precomputed distance matrix of persistence diagrams, default NULL. If not NULL then `diagrams` parameter does not need to be supplied.}
+
+\item{k}{the dimension of the space which the data are to be represented in; must be in \{1,2,...,n-1\}.}
 
 \item{distance}{a string representing the desired distance metric to be used, either 'wasserstein' (default) or 'fisher'.}
 
@@ -30,6 +34,8 @@ diagram_mds(
 \item{p}{a positive number representing the wasserstein power, a number at least 1 (infinity for the bottleneck distance), default 2.}
 
 \item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default NULL.}
+
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, distance matrix calculation is sequential.}
 
 \item{eig}{a boolean indicating whether the eigenvalues should be returned.}
 
@@ -62,9 +68,9 @@ Otherwise, a list containing the following components.
 }
 }
 \description{
-Projects a group of persistence diagrams into a low-dimensional embedding space via metric multidimensional
-scaling. Such a projection can be used for visualization of data, or a static analysis of the embedding
-dimensions.
+Projects a group of persistence diagrams (or a precomputed distance matrix of diagrams) into a low-dimensional 
+embedding space via metric multidimensional scaling. Such a projection can be used for visualization of data, 
+or a static analysis of the embedding dimensions.
 }
 \details{
 Returns the output of \code{\link[stats]{cmdscale}} on the desired distance matrix of a group of persistence diagrams
@@ -83,6 +89,16 @@ if(require("TDA") & require("TDAstats"))
 
   # calculate their 1D MDS embedding in dimension 0 with the bottleneck distance
   mds <- diagram_mds(diagrams = g,k = 1,dim = 0,p = Inf,num_workers = 2)
+  
+  # repeat but with a precomputed distance matrix, gives same result just much faster
+  Dmat <- distance_matrix(diagrams = list(D1,D2),dim = 0,p = Inf,num_workers = 2)
+  mds <- diagram_mds(D = Dmat,k = 1)
+  
+  # calculate their 1D MDS embedding in dimension 0 with the approximated Persistence
+  # Fisher metric
+  mds <- diagram_mds(diagrams = g,k = 1,dim = 0,distance = "fisher",sigma = 1,
+                     rho = 0.001,num_workers = 2)
+  
 }
 }
 \references{

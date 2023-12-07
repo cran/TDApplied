@@ -11,6 +11,7 @@ distance_matrix(
   distance = "wasserstein",
   p = 2,
   sigma = NULL,
+  rho = NULL,
   num_workers = parallelly::availableCores(omit = 1)
 )
 }
@@ -27,6 +28,9 @@ distance_matrix(
 
 \item{sigma}{a positive number representing the bandwidth of the Fisher information metric, default NULL.}
 
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If not NULL then matrix is calculated sequentially, but functions in the "exec" directory
+of the package can be loaded to calculate distance matrices in parallel with approximation.}
+
 \item{num_workers}{the number of cores used for parallel computation, default is one less than the number of cores on the machine.}
 }
 \value{
@@ -39,7 +43,9 @@ or between two lists, \eqn{(D_1,D_2,\dots,D_n)} and \eqn{(D'_1,D'_2,\dots,D'_n)}
 \details{
 Distance matrices of persistence diagrams are used in downstream analyses, like in the 
 \code{\link{diagram_mds}}, \code{\link{permutation_test}} and \code{\link{diagram_ksvm}} functions. 
-If `distance` is "fisher" then `sigma` must not be NULL.
+If `distance` is "fisher" then `sigma` must not be NULL. Since the matrix is computed sequentially when
+approximating the Fisher information metric this is only recommended when the persistence diagrams
+contain many points and when the number of available cores is small.
 }
 \examples{
 
@@ -52,11 +58,20 @@ if(require("TDA") & require("TDAstats"))
                                      dim = 0,threshold = 2)
   g <- list(D1,D2)
 
+  # calculate their distance matrix in dimension 0 with the persistence Fisher metric
+  # using 2 cores
+  D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,num_workers = 2)
+  
+  # calculate their distance matrix in dimension 0 with the approximate persistence Fisher metric
+  # using 2 cores
+  D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,rho = 0.001,
+                       num_workers = 2)
+
   # calculate their distance matrix in dimension 0 with the 2-wasserstein metric 
-  # using 2 cores in dimension 1
+  # using 2 cores
   D <- distance_matrix(diagrams = g,dim = 0,distance = "wasserstein",p = 2,num_workers = 2)
 
-  # now do the cross distance matrix, which is the same as the original
+  # now do the cross distance matrix, which is the same as the previous
   D_cross <- distance_matrix(diagrams = g,other_diagrams = g,
                              dim = 0,distance = "wasserstein",
                              p = 2,num_workers = 2)

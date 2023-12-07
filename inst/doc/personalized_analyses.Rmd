@@ -1,0 +1,220 @@
+---
+title: "Personalized Analyses with TDApplied"
+author: "Shael Brown and Dr. Reza Farivar"
+output: 
+  rmarkdown::html_document:
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Personalized Analyses with TDApplied}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+**TDApplied** contains a variety of built-in methods for performing applied analyses of persistence diagrams. However, these methods are by no means a comprehensive list of common tools used in data science. A **TDApplied** user may wish to augment their existing analysis pipelines to include persistence diagrams, which we will call a "personalized analysis". In this vignette we will explore how to use **TDApplied** in personalized analyses using a technique called *vectorization* -- assigning vectors to persistence diagrams and using these vectors in downstream analyses. Note that **TDAvec** [@TDAvec] and **TDAkit** [@TDAkit] are two R packages specifically designed for vectorization analyses, however the methods they implement remove some information in the persistence diagrams [@statistics_on_landscapes;@topological_ML] whereas the kernel approach in **TDApplied** does not remove any information. Nevertheless, **TDAvec** and **TDAkit** may also be consulted for performing personalized analyses of persistence diagrams.
+
+In this vignette we will focus on supervised machine learning analyses (i.e. classification and regression tasks), but similar approaches can be used for unsupervised machine learning, inference, etc. Standard supervised learning methods take as input an $n \times f$ feature matrix (each row representing one data point and each column representing a dataset feature) and a label vector. However, suppose that we had a complicated feature matrix which contains persistence diagrams (i.e. *topological features*), numeric and factor features (i.e. *non-topological features*). This data could be incredibly rich in predictive power, but requires special treatment to be used in typical model training pipelines. A pipeline using **TDApplied** would be:
+
+1. First separate the features into topological features $T_1,\dots,T_k$, each of which is a list of diagrams, and non-topological features which is a $n \times (f-k)$ feature matrix called $NT$.
+2. For each topological feature $T_i = \{D_{i,1},\dots,D_{i,n}\}$ we compute its (approximate) $n \times n$ Gram matrix $G_i$.
+3. Column bind all $G_i$ together into a $n \times (kn)$ feature matrix $G$.
+4. Column bind $G$ and $NT$ to get a new $n \times (kn + f - k)$ feature matrix $F$.
+5. We train the model using the feature matrix $F$ and the original labels.
+
+Once we have built our model we may want to make predictions for $n'$ new data points. In order to make predictions we need to convert this new data into a feature matrix resembling $F$, and this can be done using the same pipeline as above except in step 2 we compute the **cross** Gram matrix (see the package vignette "**TDApplied** Theory and Practice" for details about Gram and cross Gram matrices) of each $T'_i$ with its corresponding $T_i$.
+
+The following section provides an example of these two pipelines.
+
+# Classification with Extreme Gradient Boosting (XGBoost)
+
+XGBoost [@xgboost] is currently one of the most popular and high-performing machine learning models for classification and regression in industry. How could we access this prediction performance from **TDApplied**? Let's start by loading the **xgboost** package [@R-xgboost]:
+
+```{r,eval = F}
+library(xgboost)
+```
+
+The **xgboost** package has an `xgboost` function with a simple interface for training XGBoost models, requiring only a feature matrix and label vector. For our example we will consider the task of predicting which shape each training example came from -- a circle, torus or sphere. The features of our data points are two topological features, one persistence diagram sampled from the shape in dimension 1 and the other diagram sampled from dimension 2, two numeric features which are the mean persistence of the two diagrams, and one factor feature which is a random binary vector. We illustrate by creating 30 data points for this example:
+
+```{r,eval = F}
+# create 30 diagrams from circles, tori and spheres
+# up to dimension 2
+diags <- lapply(X = 1:30,FUN = function(X){
+  
+  if(X <= 10)
+  {
+    return(TDAstats::calculate_homology(TDA::circleUnif(n = 100),
+                                        dim = 2,threshold = 2))
+  }
+  
+  if(X > 10 & X <= 20)
+  {
+    return(TDAstats::calculate_homology(TDA::torusUnif(n = 100,a = 0.25,c = 0.75),
+                                        dim = 2,threshold = 2))
+  }
+  
+  if(X > 20)
+  {
+    return(TDAstats::calculate_homology(TDA::sphereUnif(n = 100,d = 2),
+                                        dim = 2,threshold = 2))
+  }
+  
+})
+
+# subset into two features, dimension 1 and dimension 2
+T1 <- lapply(X = diags,FUN = function(X){
+  
+  df <- X[which(X[,1] == 1),]
+  if(!is.matrix(df))
+  {
+    df <- as.data.frame(t(df))
+  }
+  return(as.data.frame(df))
+  
+})
+T2 <- lapply(X = diags,FUN = function(X){
+  
+  df <- X[which(X[,1] == 2),]
+  if(!is.matrix(df))
+  {
+    df <- as.data.frame(t(df))
+  }
+  return(as.data.frame(df))
+  
+})
+
+# calculate max persistence of each diagram
+max_pers_H1 <- unlist(lapply(X = T1,FUN = function(X){
+  
+  return(max(X[[3]] - X[[2]]))
+  
+}))
+max_pers_H2 <- unlist(lapply(X = T2,FUN = function(X){
+  
+  if(nrow(X) == 0)
+  {
+    return(0)
+  }
+  return(max(X[[3]] - X[[2]]))
+  
+}))
+
+# create random binary vector
+rand_bin <- sample(factor(c("yes","no")),size = 30,replace = T)
+
+# specify data labels, 0 for circle, 1 for torus, 2 for sphere
+labs <- rep(c(0,1,2),each = 10)
+```
+
+Now that we have constructed our dataset we will follow steps 1 through 5 of the pipeline to train an XGBoost model:
+
+```{r,eval = F}
+# form non-topological feature matrix
+NT <- cbind(max_pers_H1,max_pers_H2,rand_bin)
+
+# calculate the approximate Gram matrix for each topological feature
+G1 <- gram_matrix(diagrams = T1,sigma = 0.01,dim = 1,rho = 0.0001)
+G2 <- gram_matrix(diagrams = T2,sigma = 0.01,dim = 2,rho = 0.0001)
+
+# column bind G_i's into 30x60 feature matrix
+G <- cbind(G1,G2)
+
+# column bind G and NT into 30x63 feature matrix
+Fmat <- cbind(G,NT)
+
+# fit XGBoost model with maximum 50 boosting iterations
+model <- xgboost(data = Fmat,label = rep(c(0,1,2),each = 10),nrounds = 50,verbose = 0,
+                 objective = "multi:softmax",num_class = 3)
+```
+
+Now that we have fit our model, let's create three new data points:
+
+```{r,eval = F}
+new_diags <- list(TDAstats::calculate_homology(TDA::circleUnif(n = 100),
+                                        dim = 2,threshold = 2),
+                  TDAstats::calculate_homology(TDA::torusUnif(n = 100,a = 0.25,c = 0.75),
+                                        dim = 2,threshold = 2),
+                  TDAstats::calculate_homology(TDA::sphereUnif(n = 100,d = 2),
+                                        dim = 2,threshold = 2))
+
+# subset into two features, dimension 1 and dimension 2
+T1_prime <- lapply(X = new_diags,FUN = function(X){
+  
+  df <- X[which(X[,1] == 1),]
+  if(!is.matrix(df))
+  {
+    df <- as.data.frame(t(df))
+  }
+  return(as.data.frame(df))
+  
+})
+T2_prime <- lapply(X = new_diags,FUN = function(X){
+  
+  df <- X[which(X[,1] == 2),]
+  if(!is.matrix(df))
+  {
+    df <- as.data.frame(t(df))
+  }
+  return(as.data.frame(df))
+  
+})
+
+# calculate max persistence of each new diagram
+max_pers_H1_prime <- unlist(lapply(X = T1_prime,FUN = function(X){
+  
+  return(max(X[,3] - X[,2]))
+  
+}))
+max_pers_H2_prime <- unlist(lapply(X = T2_prime,FUN = function(X){
+  
+  if(nrow(X) == 0)
+  {
+    return(0)
+  }
+  return(max(X[,3] - X[,2]))
+  
+}))
+
+# create random binary vector
+rand_bin_prime <- sample(factor(c("yes","no")),size = 3,replace = T)
+```
+
+We can now predict the label of these new data points as follows:
+
+```{r,eval = F}
+# form non-topological feature matrix
+NT_prime <- cbind(max_pers_H1_prime,max_pers_H2_prime,rand_bin_prime)
+
+# calculate the approximate cross Gram matrix for each topological feature
+G1_prime <- gram_matrix(diagrams = T1_prime,other_diagrams = T1,sigma = 0.01,dim = 1,
+                        rho = 0.0001)
+G2_prime <- gram_matrix(diagrams = T2_prime,other_diagrams = T2,sigma = 0.01,dim = 2,
+                        rho = 0.0001)
+
+# column bind G_i prime's into 3x60 feature matrix
+G_prime <- cbind(G1_prime,G2_prime)
+
+# column bind G_prime and NT_prime into 3x63 feature matrix
+Fmat_prime <- cbind(G_prime,NT_prime)
+
+# fix column names of Fmat_prime to be the same as Fmat
+colnames(Fmat_prime) <- colnames(Fmat)
+
+# predict data labels
+stats::predict(model,Fmat_prime)
+```
+
+```{r,echo = F}
+c(0,1,2)
+```
+
+# Conclusion
+
+**TDApplied** contains functions which can perform a number of common data analyses with persistence diagrams. However the inability of these functions to analyze multiple features of varying types limits their utility for rich datasets. In this vignette we showed how **TDApplied** can be used to perform flexible supervised learning with topological and non-topological features with XGBoost models, but similar pipelines could be used for unsupervised learning and inference tasks. As such, **TDApplied** can interface with important data science packages to add the value of persistence diagrams to standard data science pipelines.
+
+## References

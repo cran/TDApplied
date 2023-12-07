@@ -6,9 +6,11 @@
 \usage{
 diagram_kpca(
   diagrams,
+  K = NULL,
   dim = 0,
   t = 1,
   sigma = 1,
+  rho = NULL,
   features = 1,
   num_workers = parallelly::availableCores(omit = 1),
   th = 1e-04
@@ -17,11 +19,15 @@ diagram_kpca(
 \arguments{
 \item{diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
+\item{K}{an optional precomputed Gram matrix of the persistence diagrams in `diagrams`, default NULL.}
+
 \item{dim}{the non-negative integer homological dimension in which the distance is to be computed, default 0.}
 
 \item{t}{a positive number representing the scale for the persistence Fisher kernel, default 1.}
 
-\item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default 1}
+\item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default 1.}
+
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, Gram matrix calculation is sequential.}
 
 \item{features}{number of features (principal components) to return, default 1.}
 
@@ -30,7 +36,7 @@ diagram_kpca(
 \item{th}{the threshold value under which principal components are ignored (default 0.0001).}
 }
 \value{
-a list containing the elements
+a list of class 'diagram_kpca' containing the elements
 
 \describe{
 
@@ -77,7 +83,12 @@ if(require("TDA") & require("TDAstats"))
   g <- list(D1,D2,D3,D4,D5,D6)
 
   # calculate their 2D PCA embedding with sigma = t = 2 in dimension 1
-  pca <- diagram_kpca(diagrams = g,dim = 1,t = 2,sigma = 2,features = 2,num_workers = 2)
+  pca <- diagram_kpca(diagrams = g,dim = 1,t = 2,sigma = 2,features = 2,num_workers = 2,th = 1e-6)
+  
+  # repeat with precomputed Gram matrix, gives same result but much faster
+  K <- gram_matrix(diagrams = g,dim = 1,t = 2,sigma = 2,num_workers = 2)
+  pca <- diagram_kpca(diagrams = g,K = K,dim = 1,t = 2,sigma = 2,features = 2,th = 1e-6)
+  
 }
 }
 \references{

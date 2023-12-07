@@ -6,10 +6,12 @@
 \usage{
 diagram_kkmeans(
   diagrams,
+  K = NULL,
   centers,
   dim = 0,
   t = 1,
   sigma = 1,
+  rho = NULL,
   num_workers = parallelly::availableCores(omit = 1),
   ...
 )
@@ -17,20 +19,24 @@ diagram_kkmeans(
 \arguments{
 \item{diagrams}{a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or the \code{\link{diagram_to_df}} function.}
 
+\item{K}{an optional precomputed Gram matrix of persistence diagrams, default NULL.}
+
 \item{centers}{number of clusters to initialize, no more than the number of diagrams although smaller values are recommended.}
 
 \item{dim}{the non-negative integer homological dimension in which the distance is to be computed, default 0.}
 
 \item{t}{a positive number representing the scale for the persistence Fisher kernel, default 1.}
 
-\item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default 1}
+\item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default 1.}
+
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, Gram matrix calculation is sequential.}
 
 \item{num_workers}{the number of cores used for parallel computation, default is one less than the number of cores on the machine.}
 
 \item{...}{additional parameters for the \code{\link[kernlab]{kkmeans}} kernlab function.}
 }
 \value{
-a 'diagram_kkmeans' S3 object containing the output of \code{\link[kernlab]{kkmeans}} on the Gram matrix, i.e. a list containing the elements
+a list of class 'diagram_kkmeans' containing the output of \code{\link[kernlab]{kkmeans}} on the Gram matrix, i.e. a list containing the elements
 
 \describe{
 
@@ -70,6 +76,11 @@ if(require("TDA") & require("TDAstats"))
 
   # calculate kmeans clusters with centers = 2, and sigma = t = 2 in dimension 0
   clust <- diagram_kkmeans(diagrams = g,centers = 2,dim = 0,t = 2,sigma = 2,num_workers = 2)
+  
+  # repeat with precomputed Gram matrix, gives the same result just much faster
+  K <- gram_matrix(diagrams = g,num_workers = 2,t = 2,sigma = 2)
+  cluster <- diagram_kkmeans(diagrams = g,K = K,centers = 2,dim = 0,sigma = 2,t = 2)
+  
 }
 }
 \references{

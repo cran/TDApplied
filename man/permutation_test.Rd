@@ -10,9 +10,12 @@ permutation_test(
   p = 2,
   q = 2,
   dims = c(0, 1),
+  dist_mats = NULL,
+  group_sizes = NULL,
   paired = FALSE,
   distance = "wasserstein",
   sigma = NULL,
+  rho = NULL,
   num_workers = parallelly::availableCores(omit = 1),
   verbose = FALSE
 )
@@ -28,11 +31,17 @@ permutation_test(
 
 \item{dims}{a non-negative integer vector of the homological dimensions in which the test is to be carried out, default c(0,1).}
 
+\item{dist_mats}{an optional list of precomputed distances matrices, one for each dimension, where the rows and columns would correspond to the unlisted groups of diagrams (in order), default NULL. If not NULL then no lists of diagrams need to be supplied.}
+
+\item{group_sizes}{a vector of group sizes, one for each group, when `dist_mats` is not NULL.}
+
 \item{paired}{a boolean flag for if there is a second-order pairing between diagrams at the same index in different groups, default FALSE}
 
 \item{distance}{a string which determines which type of distance calculation to carry out, either "wasserstein" (default) or "fisher".}
 
 \item{sigma}{the positive bandwidth for the Fisher information metric, default NULL.}
+
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, code execution is sequential.}
 
 \item{num_workers}{the number of cores used for parallel computation, default is one less than the number of cores on the machine.}
 
@@ -69,24 +78,35 @@ an option is provided for pairing diagrams between groups to reduce variance (in
 like it was suggested in the original paper functionality is provided for an arbitrary number of groups (not just 2).
 A small p-value in a dimension suggests that the groups are different (separated) in that dimension.
 If `distance` is "fisher" then `sigma` must not be NULL. TDAstats also has a `permutation_test` function
-so care should be taken to use the desired function when using TDApplied with TDAstats.
+so care should be taken to use the desired function when using TDApplied with TDAstats. If `dist_mats` is supplied
+then the sum of the elements of `group_sizes` must equal the number of rows and columns of each of its elements.
 }
 \examples{
 
 if(require("TDA") & require("TDAstats"))
 {
-# create two groups of diagrams
-D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                   dim = 0,threshold = 2)
-D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                   dim = 0,threshold = 2)
-g1 <- list(D1,D2)
-g2 <- list(D1,D2)
+  # create two groups of diagrams
+  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+                                     dim = 0,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+                                     dim = 0,threshold = 2)
+  g1 <- list(D1,D2)
+  g2 <- list(D1,D2)
 
-# run test in dimension 0 with 1 iteration
-perm_test <- TDApplied::permutation_test(g1,g2,iterations = 1,
-                                         num_workers = 2,
-                                         dims = c(0))
+  # run test in dimension 0 with 1 iteration, note that the TDA package function
+  # "permutation_test" can mask TDApplied's function, so we will specify explicitly
+  # which function we are using
+  perm_test <- TDApplied::permutation_test(g1,g2,iterations = 1,
+                                           num_workers = 2,
+                                           dims = c(0))
+                                 
+  # repeat with precomputed distance matrix, gives similar results
+  # (same but the randomness of the permutations can give small differences)
+  # just much faster
+  D <- distance_matrix(diagrams = list(D1,D2,D1,D2),dim = 0,
+                       num_workers = 2)
+  perm_test <- TDApplied::permutation_test(dist_mats = list(D),group_sizes = c(2,2),
+                                           dims = c(0))
 }
 }
 \references{

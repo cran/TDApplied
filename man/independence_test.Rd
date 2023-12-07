@@ -9,9 +9,12 @@ independence_test(
   g2,
   dims = c(0, 1),
   sigma = 1,
+  rho = NULL,
   t = 1,
   num_workers = parallelly::availableCores(omit = 1),
-  verbose = FALSE
+  verbose = FALSE,
+  Ks = NULL,
+  Ls = NULL
 )
 }
 \arguments{
@@ -23,11 +26,17 @@ independence_test(
 
 \item{sigma}{a positive number representing the bandwidth for the Fisher information metric, default 1.}
 
+\item{rho}{an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, calculation of Gram matrices is sequential.}
+
 \item{t}{a positive number representing the scale for the persistence Fisher kernel, default 1.}
 
 \item{num_workers}{the number of cores used for parallel computation, default is one less than the number of cores on the machine.}
 
 \item{verbose}{a boolean flag for if the time duration of the function call should be printed, default FALSE}
+
+\item{Ks}{an optional list of precomputed Gram matrices for the first group of diagrams, with one element for each dimension. If not NULL and `Ls` is not NULL then `g1` and `g2` do not need to be supplied.}
+
+\item{Ls}{an optional list of precomputed Gram matrices for the second group of diagrams, with one element for each dimension. If not NULL and `Ks` is not NULL then `g1` and `g2` do not need to be supplied.}
 }
 \value{
 a list with the following elements:
@@ -68,6 +77,12 @@ if(require("TDA") & require("TDAstats"))
 
   # do independence test with sigma = t = 1 in dimension 0
   indep_test <- independence_test(g1,g2,dims = c(0),num_workers = 2)
+  
+  # repeat with precomputed Gram matrices, gives same result just much faster
+  K = gram_matrix(diagrams = g1,dim = 0,t = 1,sigma = 1,num_workers = 2)
+  L = gram_matrix(diagrams = g2,dim = 0,t = 1,sigma = 1,num_workers = 2)
+  indep_test <- independence_test(Ks = list(K),Ls = list(L),dims = c(0))
+  
 }
 }
 \references{

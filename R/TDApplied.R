@@ -1,20 +1,16 @@
 #' Machine learning and inference for persistence diagrams
 #'
 #' Topological data analysis is a powerful tool for finding non-linear global structure
-#' in whole datasets. 'TDApplied' aims to bridge topological data analysis with data, statistical
-#' and machine learning practitioners so that more analyses may benefit from the
-#' power of topological data analysis. The main tool of topological data analysis is
-#' persistent homology, which computes a shape descriptor of a dataset, called
-#' a persistence diagram. There are five goals of this package: (1) deliver a fast implementation
-#' of persistent homology via a python interface, (2) convert persistence diagrams
-#' computed using the two main R packages for topological data analysis into a data frame, 
-#' (3) implement fast versions of both distance and kernel calculations
-#' for pairs of persistence diagrams, (4) contribute tools for the interpretation of
-#' persistence diagrams, and (5) provide parallelized methods for machine learning
-#' and inference for persistence diagrams.
+#' in whole datasets. The main tool of topological data analysis is persistent homology, which computes
+#' a topological shape descriptor of a dataset called a persistence diagram. 'TDApplied' provides 
+#' useful and efficient methods for analyzing groups of persistence diagrams with machine learning and statistical inference,
+#' and these functions can also interface with other data science packages to form flexible and integrated
+#' topological data analysis pipelines.
 #'
+#' @useDynLib TDApplied, .registration = TRUE
 #' @docType package
 #' @name TDApplied
+#' @aliases TDApplied-package
 #' @importFrom clue solve_LSAP
 #' @importFrom doParallel registerDoParallel stopImplicitCluster
 #' @importFrom foreach foreach %dopar% %do%
@@ -23,8 +19,10 @@
 #' @importFrom parallel clusterEvalQ clusterExport detectCores makeCluster stopCluster
 #' @importFrom parallelly availableCores
 #' @importFrom rdist cdist
-#' @importFrom stats cmdscale complete.cases pgamma lm quantile
+#' @importFrom stats cmdscale complete.cases pgamma lm quantile var as.dendrogram heatmap hclust dist
 #' @importFrom utils combn
 #' @importFrom iterators iter
-#' @importFrom graphics abline legend
+#' @importFrom graphics lines legend
+#' @keywords internal
+"_PACKAGE"
 NULL

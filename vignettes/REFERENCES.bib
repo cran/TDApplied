@@ -6,6 +6,15 @@
   url = {https://CRAN.R-project.org/package=TDA},
 }
 
+@article{fisher,
+  title={Statistical methods for research workers.},
+  author={Fisher, Ronald Aylmer and others},
+  journal={Statistical methods for research workers.},
+  number={6th Ed},
+  year={1936},
+  publisher={Oliver and Boyd, Edinburgh and London.}
+}
+
 @Article{R-kernlab,
     title = {kernlab -- An {S4} Package for Kernel Methods in {R}},
     author = {Alexandros Karatzoglou and Alex Smola and Kurt Hornik and Achim Zeileis},
@@ -51,6 +60,22 @@
     address = {Vienna, Austria},
     year = {2021},
     url = {https://www.R-project.org/},
+}
+
+@Manual{rgudhi,
+    title = {rgudhi: An Interface to the GUDHI Library for Topological Data Analysis},
+    author = {Aymeric Stamm},
+    year = {2023},
+    note = {R package version 0.2.0},
+    url = {https://CRAN.R-project.org/package=rgudhi}
+}
+
+@Manual{R-xgboost,
+    title = {xgboost: Extreme Gradient Boosting},
+    author = {Tianqi Chen and Tong He and Michael Benesty and Vadim Khotilovich and Yuan Tang and Hyunsu Cho and Kailong Chen and Rory Mitchell and Ignacio Cano and Tianyi Zhou and Mu Li and Junyuan Xie and Min Lin and Yifeng Geng and Yutian Li and Jiaming Yuan},
+    year = {2023},
+    note = {R package version 1.7.5.1},
+    url = {https://CRAN.R-project.org/package=xgboost}
 }
 
 @article{PD_means,
@@ -100,6 +125,16 @@ title = {Means and medians of sets of persistence diagrams}
   url = {https://www.sciencedirect.com/science/article/pii/S0747717116300098}
 }
 
+@Article{R-igraph,
+    title = {The igraph software package for complex network research},
+    author = {Gabor Csardi and Tamas Nepusz},
+    journal = {InterJournal},
+    volume = {Complex Systems},
+    pages = {1695},
+    year = {2006},
+    url = {https://igraph.org},
+  }
+
 @Manual{Ripser,
   title = {Persistent homology algorithm toolbox},
   author = {Ulrich Bauer},
@@ -117,7 +152,7 @@ title = {Means and medians of sets of persistence diagrams}
 
 @misc{tauzin2020giottotda,
       title={giotto-tda: A Topological Data Analysis Toolkit for Machine Learning and Data Exploration},
-      author={Guillaume Tauzin and Umberto Lupo and Lewis Tunstall and Julian Burella Pérez and Matteo Caorsi and Anibal Medina-Mardones and Alberto Dassatti and Kathryn Hess},
+      author={Guillaume Tauzin and Umberto Lupo and Lewis Tunstall and Julian Burella Perez and Matteo Caorsi and Anibal Medina-Mardones and Alberto Dassatti and Kathryn Hess},
       year={2020},
       eprint={2004.02551},
       archivePrefix={arXiv},
@@ -145,6 +180,36 @@ title = {Means and medians of sets of persistence diagrams}
   pages={511-533}
 }
 
+@book{comp_geom,
+author = {Edelsbrunner, Herbert and Harer, John},
+year = {2010},
+month = {01},
+pages = {},
+title = {Computational Topology: An Introduction},
+isbn = {978-0-8218-4925-5},
+doi = {10.1007/978-3-540-33259-6_7}
+}
+
+@inproceedings{xgboost,
+author = {Chen, Tianqi and Guestrin, Carlos},
+year = {2016},
+month = {08},
+pages = {785-794},
+title = {XGBoost: A Scalable Tree Boosting System},
+doi = {10.1145/2939672.2939785}
+}
+
+@article{topological_ML,
+author = {Hensel, Felix and Moor, Michael and Rieck, Bastian},
+year = {2021},
+month = {05},
+pages = {681108},
+title = {A Survey of Topological Machine Learning Methods},
+volume = {4},
+journal = {Frontiers in Artificial Intelligence},
+doi = {10.3389/frai.2021.681108}
+}
+
 @article{ComputingPH,
 author = {Zomorodian, Afra and Carlsson, Gunnar},
 year = {2005},
@@ -156,13 +221,23 @@ journal = {Discrete and Computational Geometry},
 doi = {10.1007/s00454-004-1146-y}
 }
 
+@Manual{R-devtools,
+    title = {devtools: Tools to Make Developing R Packages Easier},
+    author = {Hadley Wickham and Jim Hester and Winston Chang and Jennifer Bryan},
+    year = {2021},
+    note = {R package version 2.4.3},
+    url = {https://CRAN.R-project.org/package=devtools},
+  }
+
 @article{review_of_PH_for_fMRI,
-title = {From mathematics to medicine: A practical primer on topological data analysis (TDA) and the development of related analytic tools for the functional discovery of latent structure in fMRI data},
-journal = {PLoS ONE},
-volume = {16},
-number = {8},
+author = {Salch, Andrew and Regalski, Adam and Abdallah, Hassan and Suryadevara, Raviteja and Catanzaro, Michael and Diwadkar, Vaibhav},
 year = {2021},
-author = {A. Salch et al}
+month = {08},
+pages = {e0255859},
+title = {From mathematics to medicine: A practical primer on topological data analysis (TDA) and the development of related analytic tools for the functional discovery of latent structure in fMRI data},
+volume = {16},
+journal = {PLOS ONE},
+doi = {10.1371/journal.pone.0255859}
 }
 
 @ARTICLE{PHeconomics,
@@ -205,6 +280,29 @@ issue = {2}
  year = {2018}
 }
 
+@Article{Rcpp,
+title = {{Rcpp}: Seamless {R} and {C++} Integration},
+author = {Dirk Eddelbuettel and Romain Francois},
+journal = {Journal of Statistical Software},
+year = {2011},
+volume = {40},
+number = {8},
+pages = {1--18},
+doi = {10.18637/jss.v040.i08},
+}
+
+@inproceedings{FGT,
+ author = {Morariu, Vlad and Srinivasan, Balaji and Raykar, Vikas C and Duraiswami, Ramani and Davis, Larry S},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {D. Koller and D. Schuurmans and Y. Bengio and L. Bottou},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {Automatic online tuning for fast Gaussian summation},
+ url = {https://proceedings.neurips.cc/paper/2008/file/d96409bf894217686ba124d7356686c9-Paper.pdf},
+ volume = {21},
+ year = {2008}
+}
+
 @article{kernel_TDA,
   author  = {Genki Kusano and Kenji Fukumizu and Yasuaki Hiraoka},
   title   = {Kernel Method for Persistence Diagrams via Kernel Embedding and Weight Factor},
@@ -218,7 +316,7 @@ issue = {2}
 
 @InProceedings{sliced_wasserstein,
   title = 	 {Sliced {W}asserstein Kernel for Persistence Diagrams},
-  author =       {Mathieu Carri{\`e}re and Marco Cuturi and Steve Oudot},
+  author =       {Mathieu Carriere and Marco Cuturi and Steve Oudot},
   booktitle = 	 {Proceedings of the 34th International Conference on Machine Learning},
   pages = 	 {664--673},
   year = 	 {2017},
@@ -234,6 +332,66 @@ author = {Reininghaus, Jan and Huber, Stefan and Bauer, Ulrich and Kwitt, Roland
 year = {2014},
 month = {12},
 title = {A Stable Multi-Scale Kernel for Topological Machine Learning}
+}
+
+@ARTICLE{fMRI_clustering_2,
+  
+AUTHOR={Liu, Xiao and Chang, Catie and Duyn, Jeff},   
+	 
+TITLE={Decomposition of Spontaneous Brain Activity into Distinct fMRI Co-activation Patterns},      
+	
+JOURNAL={Frontiers in Systems Neuroscience},      
+	
+VOLUME={7},      
+
+PAGES={101},     
+	
+YEAR={2013},      
+	  
+URL={https://www.frontiersin.org/article/10.3389/fnsys.2013.00101},       
+	
+DOI={10.3389/fnsys.2013.00101},      
+	
+ISSN={1662-5137}   
+   
+}
+
+@article{fMRI_noise1,
+  title={A Survey of the Sources of Noise in fMRI},
+  author={D. Greve and G. Brown and B. Mueller and G. Glover and T. Liu and Function Biomedical Research Network},
+  journal={Psychometrika},
+  year={2013},
+  volume={78},
+  pages={396-416}
+}
+
+@article {resting_state_mapper,
+	author = {Saggar, Manish and Shine, James M. and Li{\'e}geois, Rapha{\"e}l and Dosenbach, Nico U. F. and Fair, Damien},
+	title = {Precision dynamical mapping using topological data analysis reveals a unique hub-like transition state at rest},
+	elocation-id = {2021.08.05.455149},
+	year = {2021},
+	doi = {10.1101/2021.08.05.455149},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2021/08/06/2021.08.05.455149},
+	eprint = {https://www.biorxiv.org/content/early/2021/08/06/2021.08.05.455149.full.pdf},
+	journal = {bioRxiv}
+}
+
+@article{fMRI_noise2,
+  title={Noise contributions to the fMRI signal: An overview},
+  author={T. Liu},
+  journal={NeuroImage},
+  year={2016},
+  volume={143},
+  pages={141-151}
+}
+
+@article{brain_manifold,
+title = {Human cognition involves the dynamic integration of neural activity and neuromodulatory systems},
+journal = {Nature Neuroscience},
+author = {J. Shine, et al},
+volume = {22},
+year = {2019}
 }
 
 @InProceedings{topological_time_and_space,
@@ -254,6 +412,18 @@ address="Cham",
 pages="67--77"
 }
 
+@inproceedings{figtree,
+ author = {Morariu, Vlad and Srinivasan, Balaji and Raykar, Vikas C and Duraiswami, Ramani and Davis, Larry S},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {D. Koller and D. Schuurmans and Y. Bengio and L. Bottou},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {Automatic online tuning for fast Gaussian summation},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2008/file/d96409bf894217686ba124d7356686c9-Paper.pdf},
+ volume = {21},
+ year = {2008}
+}
+
 @article {BrainOrganizationMapperNew,
 	Title = {Uncovering Dynamic Brain Reconfiguration in MEG Working Memory n-Back Task Using Topological Data Analysis},
 	Author = {Duman, Ali Nabi and Tatar, Ahmet Emin and Pirim, Harun},
@@ -268,7 +438,7 @@ pages="67--77"
 }
 
 @article {TDA_ADHD,
-author = {Gracia-Tabuenca, Zeus and D{\'\i}az-Pati{\~n}o, Juan Carlos and Arelio, Isaac and Alcauter, Sarael},
+author = {Gracia-Tabuenca, Zeus and Diaz-Patino, Juan Carlos and Arelio, Isaac and Alcauter, Sarael},
 title = {Topological Data Analysis reveals robust alterations in the whole-brain and frontal lobe functional connectomes in Attention-Deficit/Hyperactivity Disorder},
 elocation-id = {751008},
 year = {2020},
@@ -333,8 +503,25 @@ journal = {Frontiers in systems neuroscience},
 doi = {10.3389/neuro.06.004.2008}
 }
 
+@inproceedings{VR_graph, 
+author = {Zomorodian, Afra}, 
+title = {The Tidy Set: A Minimal Simplicial Set for Computing Homology of Clique Complexes}, 
+year = {2010}, 
+isbn = {9781450300162}, 
+publisher = {Association for Computing Machinery}, 
+address = {New York, NY, USA}, 
+url = {https://doi.org/10.1145/1810959.1811004}, 
+doi = {10.1145/1810959.1811004}, 
+booktitle = {Proceedings of the Twenty-Sixth Annual Symposium on Computational Geometry}, 
+pages = {257–266}, 
+numpages = {10}, 
+keywords = {simplicial set, witness complex, computational topology, vietoris-rips complex}, 
+location = {Snowbird, Utah, USA}, 
+series = {SoCG '10} 
+}
+
 @article{TDA_intro,
-author = {Chazal, Frédéric and Michel, Bertrand},
+author = {Chazal, Frederic and Michel, Bertrand},
 year = {2017},
 month = {10},
 pages = {},
@@ -342,6 +529,16 @@ title = {An Introduction to Topological Data Analysis: Fundamental and Practical
 volume = {4},
 journal = {Frontiers in Artificial Intelligence},
 doi = {10.3389/frai.2021.667963}
+}
+
+@Article{R-testthat,
+    author = {Hadley Wickham},
+    title = {testthat: Get Started with Testing},
+    journal = {The R Journal},
+    year = {2011},
+    volume = {3},
+    pages = {5--10},
+    url = {https://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf}
 }
 
 @article{TDA_chemistry,
@@ -397,7 +594,7 @@ author = {Peter Bubenik and Pawel Dlotko}
 
 @inproceedings{mapper,
   title={Topological Methods for the Analysis of High Dimensional Data Sets and 3D Object Recognition},
-  author={Gurjeet Singh and Facundo M{\'e}moli and Gunnar E. Carlsson},
+  author={Gurjeet Singh and Facundo Memoli and Gunnar E. Carlsson},
   booktitle={SPBG},
   year={2007}
 }
@@ -431,7 +628,7 @@ year = "2017",
 issn = "1053-8119",
 doi = "https://doi.org/10.1016/j.neuroimage.2016.12.018",
 url = "http://www.sciencedirect.com/science/article/pii/S1053811916307418",
-author = "César Caballero-Gaudes and Richard C. Reynolds"
+author = "Cesar Caballero-Gaudes and Richard C. Reynolds"
 }
 
 @Article{distance_calc,
@@ -472,7 +669,7 @@ year = {2021}
 }
 
 @inproceedings{kernel_test,
-author = {Gretton, Arthur and Fukumizu, Kenji and Teo, Choon and Song, Le and Sch\"{o}lkopf, Bernhard and Smola, Alex},
+author = {Gretton, Arthur and Fukumizu, Kenji and Teo, Choon and Song, Le and Scholkopf, Bernhard and Smola, Alex},
 booktitle = {Advances in Neural Information Processing Systems},
 editor = {J. Platt and D. Koller and Y. Singer and S. Roweis},
 pages = {},
@@ -491,7 +688,7 @@ year = {2007}
 }
 
 @ARTICLE{kpca,
-    author = {Bernhard Schölkopf and Alexander Smola and Klaus-Robert Müller},
+    author = {Bernhard Scholkopf and Alexander Smola and Klaus-Robert Muller},
     title = {Nonlinear Component Analysis as a Kernel Eigenvalue Problem},
     journal = {Neural Computation},
     year = {1998},
@@ -567,11 +764,43 @@ journal = {The Annals of Statistics}
 
 @article{HCP,
   title={The Human Connectome Project’s Neuroimaging Approach},
-  author={M. Glasser et al.},
+  author={M. Glasser, et al.},
   journal={Nature Neuroscience},
   year={2016},
   volume={19},
   pages={1175-1187}
+}
+
+@article{insula,
+title = {The insular cortex},
+journal = {Current Biology},
+volume = {27},
+number = {12},
+pages = {R580-R586},
+year = {2017},
+issn = {0960-9822},
+doi = {https://doi.org/10.1016/j.cub.2017.05.010},
+url = {https://www.sciencedirect.com/science/article/pii/S0960982217305468},
+author = {Nadine Gogolla}
+}
+
+@article{HCP_multimodal_parcellation,
+  title={A multi-modal parcellation of human cerebral cortex},
+  author={M. Glasser, et al.},
+  journal={Nature},
+  year={2016},
+  volume={536},
+  pages={171-178}
+}
+
+@article{Yash,
+	Author = {Singh, Yashbir and Farrelly, Colleen M. and Hathaway, Quincy A. and Leiner, Tim and Jagtap, Jaidip and Carlsson, Gunnar E. and Erickson, Bradley J.},
+	Journal = {Insights into Imaging},
+	Number = {1},
+	Pages = {58},
+	Title = {Topological data analysis in medical imaging: current state of the art},
+	Volume = {14},
+	Year = {2023}
 }
 
 @article{topological_feasibility,

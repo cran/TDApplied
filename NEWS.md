@@ -4,6 +4,20 @@
 [Pull Request](https://github.com/shaelebrown/TDApplied/pulls) number.
 Please see those for more details.
 
+# 3.0.0
+- added ability to precompute distance/Gram matrices for ML and inference functions
+- added fast approximation to Fisher information metric
+- added vignettes for speedups, HCP analysis, personalized analyses and distance calculation comparisons (and removed those parts from the main vignette)
+- fixed issues with cv model fitting in diagram_ksvm
+- added automatic calculation of t parameters in diagram_ksvm
+- decreased memory load on parallel functions (except for permutation test loss function)
+- added checks for 0 variance distance matrices in diagram_ksvm
+- added comparisons against package rgudhi
+- updated DESCRIPTION
+- added interpretations tools for vr graphs and multiple representative (co) cycles
+- improved HCP analysis
+- resolved some distance 0 cases in diagram_distance
+
 # 2.0.4
 - fixed build issues related to use of suggested packages in tests, examples and vignettes
 

@@ -8,6 +8,8 @@ test_that("diagram_distance detects incorrect parameters correctly",{
   expect_error(diagram_distance(D1 = D,D2 = D,dim = 1,p = "2"),"numeric")
   expect_error(diagram_distance(D1 = D,D2 = D,dim = 1,distance = "Wasserstein"),"distance must")
   expect_error(diagram_distance(D1 = D,D2 = D,dim = 1,distance = "fisher",sigma = NA),"sigma must")
+  expect_error(diagram_distance(D1 = D,D2 = D,dim = 1,distance = "fisher",sigma = 1,rho = 0),"positive")
+  expect_error(diagram_distance(D1 = D,D2 = D,dim = 1,distance = "fisher",sigma = 1,rho = NA),"NA")
   
 })
 
@@ -122,6 +124,8 @@ test_that("diagram_distance is computing correctly",{
   expect_equal(diagram_distance(phom1,phom2,p = 3),min_wass_3)
   expect_equal(diagram_distance(phom1,phom2,p = Inf),min_bottleneck)
   
+  expect_equal(diagram_distance(phom1,phom2,distance = "fisher",sigma = 1),diagram_distance(phom1,phom2,distance = "fisher",sigma = 1,rho = 0.0001),tolerance = 0.0001)
+  
 })
 
 test_that("distance_matrix detects incorrect parameters correctly",{
@@ -143,9 +147,9 @@ test_that("distance_matrix is computing correctly",{
   m1 <- matrix(data = c(0,diagram_distance(D1,D2,dim = 0,p = 2,distance = "wasserstein"),diagram_distance(D1,D2,dim = 0,p = 2,distance = "wasserstein"),0),byrow = T,nrow = 2,ncol = 2)
   m2 <- matrix(data = c(0,diagram_distance(D1,D2,dim = 0,p = 3,distance = "wasserstein"),diagram_distance(D1,D3,dim = 0,p = 3,distance = "wasserstein"),diagram_distance(D1,D2,dim = 0,p = 3,distance = "wasserstein"),0,diagram_distance(D2,D3,dim = 0,p = 3,distance = "wasserstein"),diagram_distance(D1,D3,dim = 0,p = 3,distance = "wasserstein"),diagram_distance(D3,D2,dim = 0,p = 3,distance = "wasserstein"),0),byrow = T,nrow = 3,ncol = 3)
   m3 <- matrix(data = c(0,diagram_distance(D1,D3,dim = 0,distance = "fisher",sigma = 1),diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1),diagram_distance(D3,D2,dim = 0,distance = "fisher",sigma = 1)),byrow = T,nrow = 2,ncol = 2)
-  colnames(m3) <- c("result.1","result.2")
   expect_identical(distance_matrix(diagrams = list(D1,D2),dim = 0,distance = "wasserstein",p = 2,num_workers = 2),m1)
   expect_equal(distance_matrix(diagrams = list(D1,D2,D3),dim = 0,distance = "wasserstein",p = 3,num_workers = 2),m2)
   expect_equal(distance_matrix(diagrams = list(D1,D2),other_diagrams = list(D1,D3),dim = 0,distance = "fisher",sigma = 1,num_workers = 2),m3)
+  expect_equal(distance_matrix(diagrams = list(D1,D2),other_diagrams = list(D1,D3),dim = 0,distance = "fisher",sigma = 1,num_workers = 2,rho = 0.00001),m3,tolerance = 0.001)
   
 })

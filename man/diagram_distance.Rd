@@ -10,7 +10,8 @@ diagram_distance(
   dim = 0,
   p = 2,
   distance = "wasserstein",
-  sigma = NULL
+  sigma = NULL,
+  rho = NULL
 )
 }
 \arguments{
@@ -24,7 +25,9 @@ diagram_distance(
 
 \item{distance}{a string which determines which type of distance calculation to carry out, either "wasserstein" (default) or "fisher".}
 
-\item{sigma}{either NULL (default) or a positive number representing the bandwidth for the Fisher information metric}
+\item{sigma}{either NULL (default) or a positive number representing the bandwidth for the Fisher information metric.}
+
+\item{rho}{either NULL (default) or a positive number. If NULL then the exact calculation of the Fisher information metric is returned and otherwise a fast approximation, see details.}
 }
 \value{
 the numeric value of the distance calculation.
@@ -43,7 +46,10 @@ method for computing distances, the Fisher information metric,
 converts the two diagrams into distributions
 defined on the plane, and calculates a distance between the resulting two distributions
 (\url{https://proceedings.neurips.cc/paper/2018/file/959ab9a0695c467e7caf75431a872e5c-Paper.pdf}).
-If the `distance` parameter is "fisher" then `sigma` must not be NULL.
+If the `distance` parameter is "fisher" then `sigma` must not be NULL. As noted in the Persistence Fisher paper,
+there is a fast speed-up approximation which has been implemented from \url{https://github.com/vmorariu/figtree} 
+and can be accessed by setting the `rho` parameter. Smaller
+values of `rho` will result in tighter approximations at the expense of longer runtime, and vice versa.
 }
 \examples{
 
@@ -63,12 +69,17 @@ if(require("TDA"))
 
   # Fisher information metric calculation between D1 and D2 for sigma = 1 in dimension 1
   diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1)
+  
+  # repeat but with fast approximation
+  diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1,rho = 0.001)
 }
 }
 \references{
 Kerber M, Morozov D and Nigmetov A (2017). "Geometry Helps to Compare Persistence Diagrams." \url{http://www.geometrie.tugraz.at/kerber/kerber_papers/kmn-ghtcpd_journal.pdf}.
 
 Le T, Yamada M (2018). "Persistence fisher kernel: a riemannian manifold kernel for persistence diagrams." \url{https://proceedings.neurips.cc/paper/2018/file/959ab9a0695c467e7caf75431a872e5c-Paper.pdf}.
+
+Vlad I. Morariu, Balaji Vasan Srinivasan, Vikas C. Raykar, Ramani Duraiswami, and Larry S. Davis. Automatic online tuning for fast Gaussian summation. Advances in Neural Information Processing Systems (NIPS), 2008.
 }
 \author{
 Shael Brown - \email{shaelebrown@gmail.com}

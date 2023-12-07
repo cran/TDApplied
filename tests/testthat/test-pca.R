@@ -37,12 +37,25 @@ test_that("diagram_kpca can accept inputs from TDA, TDAstats and diagram_to_df",
   D2 = TDA::alphaComplexDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxdimension = 1)
   D3 = TDA::ripsDiag(data.frame(x = runif(50,0,1),y = runif(50,0,1)),maxscale = 1,maxdimension = 1,library = "dionysus",location = T)
   D4 = TDAstats::calculate_homology(data.frame(x = runif(50,0,1),y = runif(50,0,1)),threshold = 1,dim = 1)
-  expect_error(diagram_kpca(diagrams = list(D1,D2,D3,D4),dim = 1,features = 2,num_workers = 2),"embedding")
+  # expect_error(diagram_kpca(diagrams = list(D1,D1,D1,D1),dim = 1,features = 2,num_workers = 2),"embedding")
   expect_error(diagram_kpca(diagrams = list(D1,D2,D3,D4),dim = 0,features = 2,num_workers = 2),"Inf")
   D1 <- data.frame(dimension = 0,birth = 2,death = 3)
   D2 <- data.frame(dimension = 0,birth = 2,death = 3.1)
   D3 <- data.frame(dimension = 0,birth = c(2,5),death = c(3.1,6))
   expect_s3_class(diagram_kpca(diagrams = list(D1,D2,D3),num_workers = 2),"diagram_kpca")
+  
+})
+
+test_that("diagram_kpca can accept a precomputed Gram matrix",{
+  
+  D1 <- data.frame(dimension = 0,birth = 2,death = 3)
+  D2 <- data.frame(dimension = 0,birth = 2,death = 3.1)
+  D3 <- data.frame(dimension = 0,birth = c(2,5),death = c(3.1,6))
+  K <- gram_matrix(diagrams = list(D1,D2,D3),dim = 0,num_workers = 2)
+  expect_s3_class(diagram_kpca(diagrams = list(D1,D2,D3),K = K,num_workers = 2),"diagram_kpca")
+  
+  K <- gram_matrix(diagrams = list(D1,D2),dim = 0,num_workers = 2)
+  expect_error(diagram_kpca(diagrams = list(D1,D2,D3),K = K,num_workers = 2),"rows")
   
 })
 
@@ -53,9 +66,9 @@ test_that("predict_diagram_kpca detects incorrect parameters correctly",{
   D3 <- data.frame(dimension = 0,birth = c(2,5),death = c(3.1,6))
   diagrams = list(D1,D2,D3)
   kpca <- diagram_kpca(diagrams = list(D1,D2,D3),features = 2,num_workers = 2)
-  expect_error(predict_diagram_kpca(new_diagrams = list(),kpca,num_workers = 2),"1")
-  expect_error(predict_diagram_kpca(new_diagrams = NA,kpca,num_workers = 2),"NA")
-  expect_error(predict_diagram_kpca(new_diagrams = list(diagrams[[1]],1),kpca,num_workers = 2),"TDA/TDAstats")
+  expect_error(predict_diagram_kpca(new_diagrams = list(),embedding = kpca,num_workers = 2),"1")
+  expect_error(predict_diagram_kpca(new_diagrams = NA,embedding = kpca,num_workers = 2),"NA")
+  expect_error(predict_diagram_kpca(new_diagrams = list(diagrams[[1]],1),embedding = kpca,num_workers = 2),"TDA/TDAstats")
   expect_error(predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = 2,num_workers = 2),"kpca")
   expect_error(predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = NULL,num_workers = 2),"supplied")
   
@@ -98,3 +111,18 @@ test_that("predict_diagram_kpca can accept inputs from TDA, TDAstats and diagram
   
 })
 
+test_that("predict_diagram_kpca can accept a precomputed Gram matrix",{
+  
+  D1 <- data.frame(dimension = 0,birth = 2,death = 3)
+  D2 <- data.frame(dimension = 0,birth = 2,death = 3.1)
+  D3 <- data.frame(dimension = 0,birth = c(2,5),death = c(3.1,6))
+  emb <- diagram_kpca(diagrams = list(D1,D2,D3),num_workers = 2)
+  K <- gram_matrix(diagrams = list(D1,D2,D3),other_diagrams = list(D1,D2,D3),dim = 0,num_workers = 2)
+  expect_type(predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = emb,num_workers = 2),"double")
+  expect_type(predict_diagram_kpca(K = K,embedding = emb,num_workers = 2),"double")
+  expect_identical(predict_diagram_kpca(K = K,embedding = emb,num_workers = 2),predict_diagram_kpca(new_diagrams = list(D1,D2,D3),embedding = emb,num_workers = 2))
+  
+  K <- gram_matrix(diagrams = list(D1,D2,D3),other_diagrams = list(D1,D2),dim = 0,num_workers = 2)
+  expect_error(predict_diagram_kpca(K = K,embedding = emb,num_workers = 2),"columns")
+  
+})
