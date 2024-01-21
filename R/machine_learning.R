@@ -9,7 +9,7 @@
 #' Returns the output of \code{\link[stats]{cmdscale}} on the desired distance matrix of a group of persistence diagrams
 #' in a particular dimension. If `distance` is "fisher" then `sigma` must not be NULL.
 #'
-#' @param diagrams a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `diagrams` and `D` need to be supplied.
+#' @param diagrams a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `diagrams` and `D` need to be supplied.
 #' @param D an optional precomputed distance matrix of persistence diagrams, default NULL. If not NULL then `diagrams` parameter does not need to be supplied.
 #' @param k the dimension of the space which the data are to be represented in; must be in \{1,2,...,n-1\}.
 #' @param distance a string representing the desired distance metric to be used, either 'wasserstein' (default) or 'fisher'.
@@ -50,13 +50,13 @@
 #' 
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2)
 #' 
 #'   # calculate their 1D MDS embedding in dimension 0 with the bottleneck distance
@@ -65,11 +65,6 @@
 #'   # repeat but with a precomputed distance matrix, gives same result just much faster
 #'   Dmat <- distance_matrix(diagrams = list(D1,D2),dim = 0,p = Inf,num_workers = 2)
 #'   mds <- diagram_mds(D = Dmat,k = 1)
-#'   
-#'   # calculate their 1D MDS embedding in dimension 0 with the approximated Persistence
-#'   # Fisher metric
-#'   mds <- diagram_mds(diagrams = g,k = 1,dim = 0,distance = "fisher",sigma = 1,
-#'                      rho = 0.001,num_workers = 2)
 #'   
 #' }
 
@@ -114,7 +109,7 @@ diagram_mds <- function(diagrams,D = NULL,k = 2,distance = "wasserstein",dim = 0
 #' to estimate cluster labels for new persistence diagrams in the `predict_diagram_kkmeans`
 #' function.
 #'
-#' @param diagrams a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or the \code{\link{diagram_to_df}} function.
+#' @param diagrams a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or the \code{\link{diagram_to_df}} function.
 #' @param K an optional precomputed Gram matrix of persistence diagrams, default NULL.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param t a positive number representing the scale for the persistence Fisher kernel, default 1.
@@ -148,13 +143,13 @@ diagram_mds <- function(diagrams,D = NULL,k = 2,distance = "wasserstein",dim = 0
 #' Dhillon, I and Guan, Y and Kulis, B (2004). "A Unified View of Kernel k-means , Spectral Clustering and Graph Cuts." \url{https://people.bu.edu/bkulis/pubs/spectral_techreport.pdf}.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D1,D2,D2)
 #' 
 #'   # calculate kmeans clusters with centers = 2, and sigma = t = 2 in dimension 0
@@ -261,7 +256,7 @@ diagram_kkmeans <- function(diagrams,K = NULL,centers,dim = 0,t = 1,sigma = 1,rh
 #' Returns the nearest (highest kernel value) \code{\link[kernlab]{kkmeans}} cluster center label for new persistence diagrams.
 #' This allows for reusing old cluster models for new tasks, or to perform cross validation.
 #'
-#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
+#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
 #' @param K an optional precomputed cross Gram matrix of the new diagrams and the diagrams used in `clustering`, default NULL. If not NULL then `new_diagrams` does not need to be supplied.
 #' @param clustering the output of a \code{\link{diagram_kkmeans}} function call, of class 'diagram_kkmeans'.
 #' @param num_workers the number of cores used for parallel computation, default is one less than the number of cores on the machine.
@@ -272,24 +267,24 @@ diagram_kkmeans <- function(diagrams,K = NULL,centers,dim = 0,t = 1,sigma = 1,rh
 #' @seealso \code{\link{diagram_kkmeans}} for clustering persistence diagrams.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D1,D2,D2)
 #' 
 #'   # calculate kmeans clusters with centers = 2, and sigma = t = 2 in dimension 0
 #'   clust <- diagram_kkmeans(diagrams = g,centers = 2,dim = 0,t = 2,sigma = 2,num_workers = 2)
 #' 
 #'   # create two new diagrams
-#'   D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D5 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   g_new <- list(D4,D5)
+#'   D3 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D4 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   g_new <- list(D3,D4)
 #' 
 #'   # predict cluster labels
 #'   predict_diagram_kkmeans(new_diagrams = g_new,clustering = clust,num_workers = 2)
@@ -370,7 +365,7 @@ predict_diagram_kkmeans <- function(new_diagrams,K = NULL,clustering,num_workers
 #' advantage of using \code{\link{diagram_kpca}} over \code{\link{diagram_mds}}. The embedding coordinates can also
 #' be used for further analysis, or simply as a data visualization tool for persistence diagrams.
 #'
-#' @param diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param K an optional precomputed Gram matrix of the persistence diagrams in `diagrams`, default NULL.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param t a positive number representing the scale for the persistence Fisher kernel, default 1.
@@ -404,21 +399,21 @@ predict_diagram_kkmeans <- function(new_diagrams,K = NULL,clustering,num_workers
 #' Scholkopf, B and Smola, A and Muller, K (1998). "Nonlinear Component Analysis as a Kernel Eigenvalue Problem." \url{https://www.mlpack.org/papers/kpca.pdf}.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create six diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D3 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-#'                                      dim = 1,threshold = 2)
-#'   D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D5 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D6 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-#'                                      dim = 1,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D5 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D6 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2,D3,D4,D5,D6)
 #' 
 #'   # calculate their 2D PCA embedding with sigma = t = 2 in dimension 1
@@ -485,7 +480,7 @@ diagram_kpca <- function(diagrams,K = NULL,dim = 0,t = 1,sigma = 1,rho = NULL,fe
 #' Compute the location in low-dimensional space of each element of a list of new persistence diagrams using a
 #' previously-computed kernel PCA embedding (from the \code{\link{diagram_kpca}} function).
 #'
-#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
+#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
 #' @param K an optional precomputed cross-Gram matrix of the new diagrams and the ones used in `embedding`, default NULL. If not NULL then `new_diagrams` does not need to be supplied.
 #' @param embedding the output of a \code{\link{diagram_kpca}} function call, of class 'diagram_kpca'.
 #' @param num_workers the number of cores used for parallel computation, default is one less than the number of cores on the machine.
@@ -496,42 +491,40 @@ diagram_kpca <- function(diagrams,K = NULL,dim = 0,t = 1,sigma = 1,rho = NULL,fe
 #' @seealso \code{\link{diagram_kpca}} for embedding persistence diagrams into a low-dimensional space.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create six diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D3 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-#'                                      dim = 1,threshold = 2)
-#'   D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D5 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-#'                                      dim = 1,threshold = 2)
-#'   D6 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-#'                                      dim = 1,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D5 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D6 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2,D3,D4,D5,D6)
 #' 
 #'   # calculate their 2D PCA embedding with sigma = t = 2 in dimension 0
-#'   # using the approximate persistence Fisher metric
 #'   pca <- diagram_kpca(diagrams = g,dim = 1,t = 2,sigma = 2,
-#'                       rho = 0.001,features = 2,num_workers = 2,
-#'                       th = 1e-6)
+#'                       features = 2,num_workers = 2,th = 1e-6)
 #' 
 #'   # project two new diagrams onto old model
-#'   D7 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
+#'   D7 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,50),],
 #'                                      dim = 0,threshold = 2)
-#'   D8 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
+#'   D8 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,50),],
 #'                                      dim = 0,threshold = 2)
-#'   g_new <- list(D4,D5)
+#'   g_new <- list(D7,D8)
 #' 
 #'   # calculate new embedding coordinates
 #'   new_pca <- predict_diagram_kpca(new_diagrams = g_new,embedding = pca,num_workers = 2)
 #'   
 #'   # repeat with precomputed Gram matrix, gives same result but much faster
 #'   K <- gram_matrix(diagrams = g_new,other_diagrams = pca$diagrams,dim = pca$dim,
-#'                    t = pca$t,sigma = pca$sigma,rho = pca$rho,num_workers = 2)
+#'                    t = pca$t,sigma = pca$sigma,num_workers = 2)
 #'   new_pca <- predict_diagram_kpca(K = K,embedding = pca,num_workers = 2)
 #' }
 
@@ -610,7 +603,7 @@ predict_diagram_kpca <- function(new_diagrams,K = NULL,embedding,num_workers = p
 #' cross-validation is performed then the mean error across folds is still recorded, but the best `t` parameter
 #' across all folds is recorded in the cv results table.
 #'
-#' @param diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param cv a positive number at most the length of `diagrams` which determines the number of cross validation splits to be performed (default 1, aka no cross-validation). If `prob.model` is TRUE then cv is set to 1 since kernlab performs 3-fold CV internally in this case. When performing classification, classes are balanced within each cv fold.
 #' @param dim a non-negative integer vector of homological dimensions in which the model is to be fit.
 #' @param t either a vector of positive numbers representing the grid of values for the scale of the persistence Fisher kernel or NULL, default 1. If NULL then t is selected automatically, see details.
@@ -654,30 +647,24 @@ predict_diagram_kpca <- function(new_diagrams,K = NULL,embedding,num_workers = p
 #' Murphy, K. "Machine learning: a probabilistic perspective." MIT press (2012).
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create four diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D3 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2,D3,D4)
 #' 
 #'   # create response vector
-#'   y <- as.factor(c("circle","sphere","circle","sphere"))
+#'   y <- as.factor(c("circle","circle","sphere","sphere"))
 #' 
 #'   # fit model without cross validation
 #'   model_svm <- diagram_ksvm(diagrams = g,cv = 1,dim = c(0),
-#'                             y = y,sigma = c(1),t = c(1),
-#'                             num_workers = 2)
-#'                             
-#'   # repeat with precomputed distance matrix, gives same result but much faster
-#'   D <- distance_matrix(diagrams = g,sigma = 1,distance = "fisher",num_workers = 2)
-#'   model_svm <- diagram_ksvm(diagrams = g,distance_matrices = list(D),cv = 1,dim = c(0),
 #'                             y = y,sigma = c(1),t = c(1),
 #'                             num_workers = 2)
 #' }
@@ -1113,7 +1100,7 @@ diagram_ksvm <- function(diagrams,cv = 1,dim,t = 1,sigma = 1,rho = NULL,y,type =
 #' This function is a wrapper of the kernlab \code{\link{predict}} function.
 #'
 #'
-#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
+#' @param new_diagrams a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.
 #' @param model the output of a \code{\link{diagram_ksvm}} function call, of class 'diagram_ksvm'.
 #' @param K an optional cross-Gram matrix of the new diagrams and the diagrams in `model`, default NULL. If not NULL then `new_diagrams` does not need to be supplied.
 #' @param num_workers the number of cores used for parallel computation, default is one less than the number of cores on the machine.
@@ -1125,21 +1112,21 @@ diagram_ksvm <- function(diagrams,cv = 1,dim,t = 1,sigma = 1,rho = NULL,y,type =
 #' @importFrom methods is
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create four diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D3 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2,D3,D4)
 #' 
 #'   # create response vector
-#'   y <- as.factor(c("circle","sphere","circle","sphere"))
+#'   y <- as.factor(c("circle","circle","sphere","sphere"))
 #' 
 #'   # fit model without cross validation
 #'   model_svm <- diagram_ksvm(diagrams = g,cv = 1,dim = c(0),
@@ -1147,16 +1134,13 @@ diagram_ksvm <- function(diagrams,cv = 1,dim,t = 1,sigma = 1,rho = NULL,y,type =
 #'                             num_workers = 2)
 #'
 #'   # create two new diagrams
-#'   D5 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D6 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D5 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D6 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g_new <- list(D5,D6)
 #' 
-#'   # predict
-#'   predict_diagram_ksvm(new_diagrams = g_new,model = model_svm,num_workers = 2)
-#'   
-#'   # repeat with precomputed Gram matrix, gives same result just much faster
+#'   # predict with precomputed Gram matrix
 #'   K <- gram_matrix(diagrams = g_new,other_diagrams = model_svm$diagrams,
 #'                    dim = model_svm$best_model$dim,sigma = model_svm$best_model$sigma,
 #'                    t = model_svm$best_model$t,num_workers = 2)

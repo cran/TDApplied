@@ -21,7 +21,7 @@ diagram_mds(
 )
 }
 \arguments{
-\item{diagrams}{a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `diagrams` and `D` need to be supplied.}
+\item{diagrams}{a list of n>=2 persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `diagrams` and `D` need to be supplied.}
 
 \item{D}{an optional precomputed distance matrix of persistence diagrams, default NULL. If not NULL then `diagrams` parameter does not need to be supplied.}
 
@@ -78,13 +78,13 @@ in a particular dimension. If `distance` is "fisher" then `sigma` must not be NU
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create two diagrams
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
+                      dim = 1,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
+                      dim = 1,threshold = 2)
   g <- list(D1,D2)
 
   # calculate their 1D MDS embedding in dimension 0 with the bottleneck distance
@@ -93,11 +93,6 @@ if(require("TDA") & require("TDAstats"))
   # repeat but with a precomputed distance matrix, gives same result just much faster
   Dmat <- distance_matrix(diagrams = list(D1,D2),dim = 0,p = Inf,num_workers = 2)
   mds <- diagram_mds(D = Dmat,k = 1)
-  
-  # calculate their 1D MDS embedding in dimension 0 with the approximated Persistence
-  # Fisher metric
-  mds <- diagram_mds(diagrams = g,k = 1,dim = 0,distance = "fisher",sigma = 1,
-                     rho = 0.001,num_workers = 2)
   
 }
 }

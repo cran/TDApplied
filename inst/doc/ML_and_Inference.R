@@ -23,9 +23,9 @@ set.seed(123)
 ## ----setup--------------------------------------------------------------------
 library("TDApplied")
 
-## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center',eval = requireNamespace("TDA")----
+## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center',eval = requireNamespace("TDAstats")----
 par(mfrow = c(1,4))
-circ <- TDA::circleUnif(n = 50,r = 1)
+circ <- TDAstats::circle2d[sample(1:100,50),]
 plot(x = circ[,1],y = circ[,2],main = "Approximation 1:\nindividual data points",xlab = "",ylab = "",las = 1)
 plot(x = circ[,1],y = circ[,2],main = "Approximation 2:\nnot a loop",xlab = "",ylab = "",las = 1)
 for(i in 1:(nrow(circ)-1))
@@ -83,16 +83,23 @@ plot(x = circ$x,y = circ$y,xlab = "x",ylab = "y",main = "circ")
 diag <- data.frame(dimension = c(rep(0,50),1),birth = c(rep(0,50),0.5579783),death = c(0.0123064760118723,0.0144490944221616,0.0149910748004913,0.0156172784045339,0.0172923970967531,0.0189713705331087,0.0196240246295929,0.0225948672741652,0.0286996569484472,0.0365069359540939,0.038569450378418,0.0386403761804104,0.0444764532148838,0.0477333702147007,0.0612373314797878,0.0639129132032394,0.0699725300073624,0.0705153122544289,0.0721508488059044,0.0791449695825577,0.0858016163110733,0.0872511267662048,0.0882881134748459,0.0893174782395363,0.0925402045249939,0.0944025367498398,0.0944980531930923,0.099234826862812,0.117955945432186,0.120451688766479,0.126571387052536,0.139067515730858,0.142296731472015,0.148265853524208,0.158034011721611,0.181465998291969,0.188804805278778,0.19113427400589,0.20612421631813,0.21517525613308,0.228875741362572,0.233790531754494,0.235128790140152,0.242270082235336,0.244500055909157,0.245646774768829,0.254552245140076,0.281323730945587,0.288743227720261,2,1.73859250545502))
 diag[47:51,]
 
-## ----echo = T,eval = requireNamespace("TDAstats") & requireNamespace("TDA")----
-# convert TDA diagram into data frame
-diag1 <- TDA::ripsDiag(circ,maxdimension = 1,maxscale = 2,library = "dionysus")
-diag1_df <- diagram_to_df(diag1)
-class(diag1_df)
+## ----echo = T,eval = F--------------------------------------------------------
+#  # convert TDA diagram into data frame
+#  diag1 <- TDA::ripsDiag(circ,maxdimension = 1,maxscale = 2,library = "dionysus")
+#  diag1_df <- diagram_to_df(diag1)
+#  class(diag1_df)
 
-# convert TDAstats diagram into data frame
-diag2 <- TDAstats::calculate_homology(circ,dim = 1,threshold = 2)
-diag2_df <- diagram_to_df(diag1)
-class(diag2_df)
+## ----echo = F-----------------------------------------------------------------
+c("data.frame")
+
+## ----echo = T,eval = F--------------------------------------------------------
+#  # convert TDAstats diagram into data frame
+#  diag2 <- TDAstats::calculate_homology(circ,dim = 1,threshold = 2)
+#  diag2_df <- diagram_to_df(diag1)
+#  class(diag2_df)
+
+## ----echo = F-----------------------------------------------------------------
+c("data.frame")
 
 ## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center'---------------
 D1 = data.frame(dimension = c(0),birth = c(2),death = c(3))
@@ -170,12 +177,19 @@ diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1)
 # Fisher information metric calculation between D1 and D3 for sigma = 1
 diagram_distance(D1,D3,dim = 0,distance = "fisher",sigma = 1)
 
-## ----echo = T-----------------------------------------------------------------
-# Fisher information metric calculation between D1 and D2 for sigma = 1
-diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1)
+## ----echo = T,eval = F--------------------------------------------------------
+#  # Fisher information metric calculation between D1 and D2 for sigma = 1
+#  diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1)
 
-# fast approximate Fisher information metric calculation between D1 and D3 for sigma = 1
-diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1,rho = 0.001)
+## ----echo = F-----------------------------------------------------------------
+0.02354779
+
+## ----echo = T,eval = F--------------------------------------------------------
+#  # fast approximate Fisher information metric calculation between D1 and D3 for sigma = 1
+#  diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1,rho = 0.001)
+
+## ----echo = F-----------------------------------------------------------------
+0.02354779
 
 ## ----echo = T-----------------------------------------------------------------
 # calculate the kernel value between D1 and D2 with sigma = 2, t = 2
@@ -195,26 +209,37 @@ graphics::lines(x = c(pt[[1]],pt[[1]] + 0.3953059),y = c(pt[[2]],pt[[2]]))
 graphics::lines(x = c(pt[[1]],pt[[1]]),y = c(pt[[2]],pt[[2]] - 0.3953059))
 graphics::text(x = c(pt[[1]] + 0.3953059/2,0.4),y = c(1.83,1.55),c("t","t"))
 
-## ----fig.height = 4,fig.width = 8,fig.align = 'center'------------------------
-# calculate the bootstrapped persistence thresholds using 2 cores
-# and 30 iterations. We'll use the distance matrix of circ to
-# make representative cycles more comprehensible
-thresh <- bootstrap_persistence_thresholds(X = as.matrix(dist(circ)),
-                                           FUN_diag = "ripsDiag",
-                                           FUN_boot = "ripsDiag",
-                                           distance_mat = T,
-                                           maxdim = 1,thresh = 2,num_workers = 2,
-                                           alpha = 0.05,num_samples = 30,
-                                           return_subsetted = T,return_pvals = T,
-                                           calculate_representatives = T)
+## ----fig.height = 4,fig.width = 8,fig.align = 'center',eval = F---------------
+#  # calculate the bootstrapped persistence thresholds using 2 cores
+#  # and 30 iterations. We'll use the distance matrix of circ to
+#  # make representative cycles more comprehensible
+#  library("TDA")
+#  thresh <- bootstrap_persistence_thresholds(X = as.matrix(dist(circ)),
+#                                             FUN_diag = 'ripsDiag',
+#                                             FUN_boot = 'ripsDiag',
+#                                             distance_mat = T,
+#                                             maxdim = 1,thresh = 2,num_workers = 2,
+#                                             alpha = 0.05,num_samples = 30,
+#                                             return_subsetted = T,return_pvals = T,
+#                                             calculate_representatives = T)
+#  diag <- thresh$diag
+#  
+#  # plot original diagram and thresholded diagram side-by-side, including
+#  # p-values. These p-values are the smallest possible (1/31) when there
+#  # are 30 bootstrap iterations
+#  par(mfrow = c(1,2))
+#  
+#  plot_diagram(diag,title = "Circ diagram")
+#  
+#  plot_diagram(diag,title = "Circ diagram with thresholds",
+#               thresholds = thresh$thresholds)
+#  text(x = c(0.2,0.5),y = c(2,1.8),
+#       paste("p = ",round(thresh$pvals,digits = 3)),
+#       cex = 0.5)
+
+## ----fig.height = 4,fig.width = 8,fig.align = 'center',eval = T,echo = F------
+thresh <- readRDS("thresh.rds")
 diag <- thresh$diag
-
-# the p-value are 1/31 (about 0.032) and 2/31 (about 0.065) respectively 
-# which are the two smallest possible values when num_samples = 30 
-thresh$pvals
-
-# plot original diagram and thresholded diagram side-by-side, including
-# p-values
 par(mfrow = c(1,2))
 
 plot_diagram(diag,title = "Circ diagram")
@@ -384,26 +409,6 @@ for(i in vertex_inds)
                               ybottom = layout[i,2L] - 0.05,
                               ytop = layout[i,2L] + 0.05)
 }
-
-## ----eval = requireNamespace("TDA"),fig.height = 5,fig.width = 5,fig.align = 'center'----
-# create 10 copies with added Gaussian noise and
-# calculate their diagrams from distance matrices
-circs <- lapply(X = 1:10,FUN = function(X){
-   df <- circ
-   df$x <- df$x + rnorm(n = 50,sd = 0.05)
-   df$y <- df$y + rnorm(n = 50,sd = 0.05)
-   diag <- bootstrap_persistence_thresholds(X = as.matrix(dist(df)),
-                                            FUN_diag = "ripsDiag",
-                                            FUN_boot = "ripsDiag",maxdim = 1,
-                                            thresh = 2,distance_mat = T,
-                                            calculate_representatives = T,
-                                            return_subsetted = T)
-   return(diag)
-})
-
-# plot the membership matrix of loop representatives
-membership_mat <- analyze_representatives(diagrams = circs,
-                                          dim = 1,num_points = 50)
 
 ## ----echo = F,fig.height = 3,fig.width = 7,fig.align = 'center'---------------
 par(mfrow = c(1,3))

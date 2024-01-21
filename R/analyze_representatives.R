@@ -18,7 +18,7 @@
 #' in the heatmap, a dataframe `boxed_reps` can be supplied with two integer columns - 'diagram' and 'rep'. For example, if we wish to draw a box for DX[Y] then we
 #' add the row (diagram = X,rep = Y) to `boxed_reps`. If `d` is supplied then it will be used to cluster the representatives, based on the distances in `d`.
 #'
-#' @param diagrams a list of persistence diagrams, either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, \code{\link{diagram_to_df}} or \code{\link{bootstrap_persistence_thresholds}}.
+#' @param diagrams a list of persistence diagrams, either the output of persistent homology calculations like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, \code{\link{diagram_to_df}} or \code{\link{bootstrap_persistence_thresholds}}.
 #' @param dim the integer homological dimension of representatives to consider.
 #' @param num_points the integer number of data points in all the original datasets (from which the diagrams were calculated).
 #' @param plot_heatmap a boolean representing if a heatmap of data point membership similarity of the representatives should be plotted, default `TRUE`. A dendrogram of hierarchical clustering is plotted, and rows (representatives) are sorted according to this clustering.
@@ -29,45 +29,10 @@
 #' @param title a character string title for the plotted heatmap, default NULL.
 #' @param return_clust a boolean determining whether or not to return the result of the `stats::hclust` call when a heatmap is plotted, default `FALSE`.
 #' @return either a matrix of data point contributions to the representatives, or a list with elements "memberships" (the matrix) and some combination of elements "contributions" (a vector of membership percentages for each data point across representatives) and "clust" (the results of `stats::hclust` on the membership matrix).
-#' @export
 #' @importFrom stats heatmap order.dendrogram as.dendrogram hclust as.dist
 #' @importFrom graphics rect
 #' @author Shael Brown - \email{shaelebrown@@gmail.com}
-#' @examples
-#'
-#' if(require("TDA"))
-#' {
-#'   # sample 50 points from a unit circle
-#'   circ <- TDA::circleUnif(n = 50)
-#'   # create 3 copies with added Gaussian noise and
-#'   # calculate their diagrams from distance matrices
-#'   circs <- lapply(X = 1:3,FUN = function(X){
-#'      df <- circ
-#'      df[,1] <- df[,1] + rnorm(n = 50,sd = 0.05)
-#'      df[,2] <- df[,2] + rnorm(n = 50,sd = 0.05)
-#'      diag <- TDA::ripsDiag(X = as.matrix(dist(df)),
-#'                            maxdimension = 1,
-#'                            maxscale = 2,
-#'                            dist = "arbitrary",
-#'                            location = TRUE,
-#'                            library = "dionysus")
-#'      return(diag)
 #'   
-#'    })
-#'    
-#'    # analyze loop representatives across the diagrams
-#'    # num_points is 50 because each underlying dataset had
-#'    # 50 (corresponding) points
-#'    analyze_representatives(diagrams = circs,dim = 1,
-#'                            num_points = 50)
-#'                            
-#'    # now highlight the first diagram's first loop, which is
-#'    # its 51st representative
-#'    br <- data.frame(diagram = 1,rep = 51)
-#'    analyze_representatives(diagrams = circs,dim = 1,
-#'                            num_points = 50,boxed_reps = br)
-#'   
-#' }
 
 analyze_representatives <- function(diagrams,dim,num_points,plot_heatmap = TRUE,return_contributions = FALSE,boxed_reps = NULL,d = NULL,lwd = NULL,title = NULL,return_clust = FALSE){
   

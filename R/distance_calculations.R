@@ -2,7 +2,7 @@
 #' Calculate distance between a pair of persistence diagrams.
 #'
 #' Calculates the distance between a pair of persistence diagrams, either the output from a \code{\link{diagram_to_df}} function call
-#' or from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}},
+#' or from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}},
 #' in a particular homological dimension.
 #'
 #' The most common distance calculations between persistence diagrams
@@ -41,13 +41,13 @@
 #' 
 #' @examples
 #'
-#' if(require("TDA"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDA::ripsDiag(TDA::circleUnif(n = 20,r = 1),
-#'                       maxdimension = 1,maxscale = 2)
-#'   D2 <- TDA::ripsDiag(TDA::sphereUnif(n = 20,d = 2,r = 1),
-#'                       maxdimension = 1,maxscale = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,size = 20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,size = 20),],
+#'                       dim = 1,threshold = 2)
 #'
 #'   # calculate 2-wasserstein distance between D1 and D2 in dimension 1
 #'   diagram_distance(D1,D2,dim = 1,p = 2,distance = "wasserstein")
@@ -59,7 +59,9 @@
 #'   diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1)
 #'   
 #'   # repeat but with fast approximation
+#'   \dontrun{
 #'   diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1,rho = 0.001)
+#'   }
 #' }
 
 diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma = NULL,rho = NULL){
@@ -310,7 +312,7 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
 #' approximating the Fisher information metric this is only recommended when the persistence diagrams
 #' contain many points and when the number of available cores is small.
 #'
-#' @param diagrams a list of persistence diagrams, either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param diagrams a list of persistence diagrams, either the output of persistent homology calculations like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param other_diagrams either NULL (default) or another list of persistence diagrams to compute a cross-distance matrix.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param distance a character determining which metric to use, either "wasserstein" (default) or "fisher".
@@ -330,23 +332,18 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
 #' @importFrom iterators iter
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
 #'   g <- list(D1,D2)
 #'
 #'   # calculate their distance matrix in dimension 0 with the persistence Fisher metric
 #'   # using 2 cores
 #'   D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,num_workers = 2)
-#'   
-#'   # calculate their distance matrix in dimension 0 with the approximate persistence Fisher metric
-#'   # using 2 cores
-#'   D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,rho = 0.001,
-#'                        num_workers = 2)
 #'
 #'   # calculate their distance matrix in dimension 0 with the 2-wasserstein metric 
 #'   # using 2 cores

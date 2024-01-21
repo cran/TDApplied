@@ -2,12 +2,12 @@
 title: "TDApplied Theory and Practice"
 author: "Shael Brown and Dr. Reza Farivar"
 output: 
-  rmarkdown::html_document:
+  rmarkdown::html_document: 
     fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{TDApplied Theory and Practice}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 bibliography: REFERENCES.bib
 ---
 
@@ -78,9 +78,9 @@ Let's get started!
 
 The main tool of topological data analysis is called *persistent homology* [@PHoriginal;@ComputingPH]. Persistent homology starts with either data points and a distance function, or a distance matrix storing distance values between data points. It assumes that these points arise from a dataset with some kind of "shape". This "shape" has certain features that exist at various scales, but sampling induces noise in these features. Persistent homology aims to describe certain mathematical features of this underlying shape, by forming approximations to the shape at various distance scales. The mathematical features which are tracked include clusters (connected components), loops (ellipses) and voids (spheres), which are examples of *cycles* (i.e. different types of holes). The *homological dimension* of these features are 0, 1 and 2, respectively. What is interesting about these particular mathematical features is that they can tell us where our data is not, which is extremely important information which other data analysis methods cannot provide.
 
-```{r,echo = F,fig.height = 3,fig.width = 7,fig.align = 'center',eval = requireNamespace("TDA")}
+```{r,echo = F,fig.height = 3,fig.width = 7,fig.align = 'center',eval = requireNamespace("TDAstats")}
 par(mfrow = c(1,4))
-circ <- TDA::circleUnif(n = 50,r = 1)
+circ <- TDAstats::circle2d[sample(1:100,50),]
 plot(x = circ[,1],y = circ[,2],main = "Approximation 1:\nindividual data points",xlab = "",ylab = "",las = 1)
 plot(x = circ[,1],y = circ[,2],main = "Approximation 2:\nnot a loop",xlab = "",ylab = "",las = 1)
 for(i in 1:(nrow(circ)-1))
@@ -167,18 +167,25 @@ Note that the installation status of Python for `PyH` is checked using the funct
 
 ## Converting Diagrams to DataFrames with **TDApplied**'s `diagram_to_df` Function
 
-The most typical data structure used in R for data science is a data frame. The output of the `PyH` function is a data frame (unless representatives are calculated, in which case the output is a list containing a data frame and other information), but the persistence diagrams calculated from the popular R packages **TDA** [@R-TDA] and **TDAstats** [@R-TDAstats] are not stored in data frames, making subsequent machine learning and inference analyses of these diagrams challenging. In order to solve this problem the **TDApplied** function `diagram_to_df` can convert **TDA**/**TDAstats** persistence diagrams into data frames:
+The most typical data structure used in R for data science is a data frame. The output of the `PyH` function is a data frame (unless representatives are calculated, in which case the output is a list containing a data frame and other information), but the persistence diagrams calculated from the popular R packages **TDA** [@R-TDA] and **TDAstats** [@R-TDAstats] are not stored in data frames, making subsequent machine learning and inference analyses of these diagrams challenging. Since In order to solve this problem the **TDApplied** function `diagram_to_df` can convert **TDA**/**TDAstats** persistence diagrams into data frames:
 
-```{r,echo = T,eval = requireNamespace("TDAstats") & requireNamespace("TDA")}
+```{r,echo = T,eval = F}
 # convert TDA diagram into data frame
 diag1 <- TDA::ripsDiag(circ,maxdimension = 1,maxscale = 2,library = "dionysus")
 diag1_df <- diagram_to_df(diag1)
 class(diag1_df)
-
+```
+```{r,echo = F}
+c("data.frame")
+```
+```{r,echo = T,eval = F}
 # convert TDAstats diagram into data frame
 diag2 <- TDAstats::calculate_homology(circ,dim = 1,threshold = 2)
 diag2_df <- diagram_to_df(diag1)
 class(diag2_df)
+```
+```{r,echo = F}
+c("data.frame")
 ```
 
 When a persistence diagram is calculated with either `PyH`, `ripsDiag` or `alphaComplexDiag` and contains representatives, `diagram_to_df` only returns the persistence diagram data frame (i.e. the representatives are ignored).
@@ -297,12 +304,20 @@ Again, D1 and D2 are less different than D1 and D3 using the Fisher information 
 
 A fast approximation to the Fisher information metric was described in [@persistence_fisher], and C++ code in the GitHub repository (https://github.com/vmorariu/figtree) was used to calculate this approximation in Matlab. Using the Rcpp package [@Rcpp] this code is included in **TDApplied** and the approximation can be calculated by providing the positive `rho` parameter:
 
-```{r,echo = T}
+```{r,echo = T,eval = F}
 # Fisher information metric calculation between D1 and D2 for sigma = 1
 diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1)
+```
+```{r,echo = F}
+0.02354779
+```
 
+```{r,echo = T,eval = F}
 # fast approximate Fisher information metric calculation between D1 and D3 for sigma = 1
 diagram_distance(D1,D2,dim = 0,distance = "fisher",sigma = 1,rho = 0.001)
+```
+```{r,echo = F}
+0.02354779
 ```
 
 Now we will explore calculating similarity of persistence diagrams using kernel functions. A kernel function is a special (positive semi-definite) symmetric similarity measure between objects in some complicated space which can be used to project data into a space suitable for machine learning [@murphyML]. Some examples of machine learning techniques which can be "kernelized" when dealing with complicated data are *k-means* (kernel k-means), *principal components analysis* (kernel PCA), and *support vector machines* (SVM) which are inherently based on kernel calculations.
@@ -363,13 +378,14 @@ Like in [@Robinson_Turner] we can calculate the p-value for a feature as $p = \f
 
 The function `bootstrap_persistence_thresholds` can be used to determine these persistence thresholds. Here is an example for the circ dataset, and the results can be plotted with the `plot_diagram` function (with overlaid p-values using the graphics `text` function):
 
-```{r,fig.height = 4,fig.width = 8,fig.align = 'center'}
+```{r,fig.height = 4,fig.width = 8,fig.align = 'center',eval = F}
 # calculate the bootstrapped persistence thresholds using 2 cores
 # and 30 iterations. We'll use the distance matrix of circ to
 # make representative cycles more comprehensible
+library("TDA")
 thresh <- bootstrap_persistence_thresholds(X = as.matrix(dist(circ)),
-                                           FUN_diag = "ripsDiag",
-                                           FUN_boot = "ripsDiag",
+                                           FUN_diag = 'ripsDiag',
+                                           FUN_boot = 'ripsDiag',
                                            distance_mat = T,
                                            maxdim = 1,thresh = 2,num_workers = 2,
                                            alpha = 0.05,num_samples = 30,
@@ -377,12 +393,23 @@ thresh <- bootstrap_persistence_thresholds(X = as.matrix(dist(circ)),
                                            calculate_representatives = T)
 diag <- thresh$diag
 
-# the p-value are 1/31 (about 0.032) and 2/31 (about 0.065) respectively 
-# which are the two smallest possible values when num_samples = 30 
-thresh$pvals
-
 # plot original diagram and thresholded diagram side-by-side, including
-# p-values
+# p-values. These p-values are the smallest possible (1/31) when there
+# are 30 bootstrap iterations
+par(mfrow = c(1,2))
+
+plot_diagram(diag,title = "Circ diagram")
+
+plot_diagram(diag,title = "Circ diagram with thresholds",
+             thresholds = thresh$thresholds)
+text(x = c(0.2,0.5),y = c(2,1.8),
+     paste("p = ",round(thresh$pvals,digits = 3)),
+     cex = 0.5)
+```
+
+```{r,fig.height = 4,fig.width = 8,fig.align = 'center',eval = T,echo = F}
+thresh <- readRDS("thresh.rds")
+diag <- thresh$diag
 par(mfrow = c(1,2))
 
 plot_diagram(diag,title = "Circ diagram")
@@ -398,7 +425,7 @@ text(x = c(0.2,0.5),y = c(2,1.8),
 par(mfrow = c(1,1))
 ```
 
-The bootstrap procedure can be done in parallel or sequentially, depending on which function is specified to calculate the persistence diagrams. There are three possible such functions -- **TDAstats**' `calculate_homology`, **TDA**'s `ripsDiag` and **TDApplied**'s `PyH`. The functions `calculate_homology` and `ripsDiag` can be run in parallel. However, `PyH` is the fastest function followed by `calculate_homology` based on our simulations. Both `ripsDiag` and `PyH` allow for the calculation of representative (co)cycles (i.e. the approximate location in the data of each topological feature), whereas `calculate_homology` does not. Therefore, our recommendation is to pick the function according to the following criteria: if a user can use the `PyH` function, then it should be used in all cases except for when the input data set is small, the machine has many available cores and the number of desired bootstrap iterations is large. Otherwise, use `calculate_homology` for speed or `ripsDiag` for calculating representatives. 
+To see why we needed to load the **TDA** package prior to the function call please see the `bootstrap_persistence_thresholds` function documentation. The bootstrap procedure can be done in parallel or sequentially, depending on which function is specified to calculate the persistence diagrams. There are three possible such functions -- **TDAstats**' `calculate_homology`, **TDA**'s `ripsDiag` and **TDApplied**'s `PyH`. The functions `calculate_homology` and `ripsDiag` can be run in parallel. However, `PyH` is the fastest function followed by `calculate_homology` based on our simulations. Both `ripsDiag` and `PyH` allow for the calculation of representative (co)cycles (i.e. the approximate location in the data of each topological feature), whereas `calculate_homology` does not. Therefore, our recommendation is to pick the function according to the following criteria: if a user can use the `PyH` function, then it should be used in all cases except for when the input data set is small, the machine has many available cores and the number of desired bootstrap iterations is large. Otherwise, use `calculate_homology` for speed or `ripsDiag` for calculating representatives. 
 
 ## Representative (Co)Cycles
 
@@ -604,34 +631,34 @@ for(i in vertex_inds)
 
 These visualizations can help determine which points are part of a representative and what the dataset structure is at various scales.
 
-## Analyzing Multiple Representatives with **TDApplied**'s `analyze_representatives` Function
+<!-- ## Analyzing Multiple Representatives with **TDApplied**'s `analyze_representatives` Function -->
 
-Now that we have tools for visualizing and interpreting individual representative (co)cycles, we will introduce a tool for interpreting multiple representatives. Consider a scenario when we have multiple datasets tracking the same data points - for example, 100 datasets representing  correlations of the same 50 stock's values across 100 distinct temporal windows. Representative cycles of each individual dataset can reveal periodic covariance of the stock values, but are the cycles representing the same feature across datasets? One way we can approach this problem is to determine if roughly the same data points (in our example, stocks) contribute (i.e. are members of) all the representative cycles across the datasets. Intuitively, if all representatives involved roughly the same points, then they represent the same feature. On the other hand, there could be multiple signatures of representatives (based on their members) or the representatives may be completely disjoint (or even not significant).
+<!-- Now that we have tools for visualizing and interpreting individual representative (co)cycles, we will introduce a tool for interpreting multiple representatives. Consider a scenario when we have multiple datasets tracking the same data points - for example, 100 datasets representing  correlations of the same 50 stock's values across 100 distinct temporal windows. Representative cycles of each individual dataset can reveal periodic covariance of the stock values, but are the cycles representing the same feature across datasets? One way we can approach this problem is to determine if roughly the same data points (in our example, stocks) contribute (i.e. are members of) all the representative cycles across the datasets. Intuitively, if all representatives involved roughly the same points, then they represent the same feature. On the other hand, there could be multiple signatures of representatives (based on their members) or the representatives may be completely disjoint (or even not significant). -->
 
-We can use the function `analyze_representatives` to plot and analyze the memberships of representatives computed from distance matrices (this ensures that data point i is considered the same across all datasets). For example, we can create 10 copies of the circ dataset with small amounts of Gaussian noise to its points, and should be able to analyze the resulting 10 loop representatives to see that they are basically the same:
+<!-- We can use the function `analyze_representatives` to plot and analyze the memberships of representatives computed from distance matrices (this ensures that data point i is considered the same across all datasets). For example, we can create 10 copies of the circ dataset with small amounts of Gaussian noise to its points, and should be able to analyze the resulting 10 loop representatives to see that they are basically the same: -->
 
-```{r,eval = requireNamespace("TDA"),fig.height = 5,fig.width = 5,fig.align = 'center'}
-# create 10 copies with added Gaussian noise and
-# calculate their diagrams from distance matrices
-circs <- lapply(X = 1:10,FUN = function(X){
-   df <- circ
-   df$x <- df$x + rnorm(n = 50,sd = 0.05)
-   df$y <- df$y + rnorm(n = 50,sd = 0.05)
-   diag <- bootstrap_persistence_thresholds(X = as.matrix(dist(df)),
-                                            FUN_diag = "ripsDiag",
-                                            FUN_boot = "ripsDiag",maxdim = 1,
-                                            thresh = 2,distance_mat = T,
-                                            calculate_representatives = T,
-                                            return_subsetted = T)
-   return(diag)
-})
+<!-- ```{r,eval = requireNamespace("TDA"),fig.height = 5,fig.width = 5,fig.align = 'center'} -->
+<!-- # create 10 copies with added Gaussian noise and -->
+<!-- # calculate their diagrams from distance matrices -->
+<!-- circs <- lapply(X = 1:10,FUN = function(X){ -->
+<!--    df <- circ -->
+<!--    df$x <- df$x + rnorm(n = 50,sd = 0.05) -->
+<!--    df$y <- df$y + rnorm(n = 50,sd = 0.05) -->
+<!--    diag <- bootstrap_persistence_thresholds(X = as.matrix(dist(df)), -->
+<!--                                             FUN_diag = "ripsDiag", -->
+<!--                                             FUN_boot = "ripsDiag",maxdim = 1, -->
+<!--                                             thresh = 2,distance_mat = T, -->
+<!--                                             calculate_representatives = T, -->
+<!--                                             return_subsetted = T) -->
+<!--    return(diag) -->
+<!-- }) -->
 
-# plot the membership matrix of loop representatives
-membership_mat <- analyze_representatives(diagrams = circs,
-                                          dim = 1,num_points = 50)
-```
+<!-- # plot the membership matrix of loop representatives -->
+<!-- membership_mat <- analyze_representatives(diagrams = circs, -->
+<!--                                           dim = 1,num_points = 50) -->
+<!-- ``` -->
 
-The rows of this heatmap are the representatives calculated from the input diagrams, and the columns are the (shared across dataset) data points. The matrix values are membership - is this point in this representative. A dendrogram can help us interpret how many types of representatives exist in our datasets, but visually we can also see that there is a strong common signature across all the loop representatives including roughly the first 13 data points. This significant overlap suggests that the loop representatives are all representing the same topological feature across datasets.
+<!-- The rows of this heatmap are the representatives calculated from the input diagrams, and the columns are the (shared across dataset) data points. The matrix values are membership - is this point in this representative. A dendrogram can help us interpret how many types of representatives exist in our datasets, but visually we can also see that there is a strong common signature across all the loop representatives including roughly the first 13 data points. This significant overlap suggests that the loop representatives are all representing the same topological feature across datasets. -->
 
 # Hypothesis Testing
 

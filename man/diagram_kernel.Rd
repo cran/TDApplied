@@ -25,7 +25,7 @@ the numeric kernel value.
 \description{
 Returns the persistence Fisher kernel value between a pair of persistence diagrams
 in a particular homological dimension, each of which is either the output from a \code{\link{diagram_to_df}} 
-function call or from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}.
+function call or from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}.
 }
 \details{
 The persistence Fisher kernel is calculated from the Fisher information metric according to the formula
@@ -34,13 +34,13 @@ Euclidean spaces.
 }
 \examples{
 
-if(require("TDA"))
+if(require("TDAstats"))
 {
   # create two diagrams
-  D1 <- TDA::ripsDiag(TDA::circleUnif(n = 20,r = 1),
-                      maxdimension = 1,maxscale = 2)
-  D2 <- TDA::ripsDiag(TDA::sphereUnif(n = 20,d = 2,r = 1),
-                      maxdimension = 1,maxscale = 2)
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
 
   # calculate the kernel value between D1 and D2 with sigma = 2, t = 2 in dimension 1
   diagram_kernel(D1,D2,dim = 1,sigma = 2,t = 2)

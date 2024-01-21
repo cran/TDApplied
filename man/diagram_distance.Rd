@@ -34,7 +34,7 @@ the numeric value of the distance calculation.
 }
 \description{
 Calculates the distance between a pair of persistence diagrams, either the output from a \code{\link{diagram_to_df}} function call
-or from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}},
+or from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}},
 in a particular homological dimension.
 }
 \details{
@@ -53,13 +53,13 @@ values of `rho` will result in tighter approximations at the expense of longer r
 }
 \examples{
 
-if(require("TDA"))
+if(require("TDAstats"))
 {
   # create two diagrams
-  D1 <- TDA::ripsDiag(TDA::circleUnif(n = 20,r = 1),
-                      maxdimension = 1,maxscale = 2)
-  D2 <- TDA::ripsDiag(TDA::sphereUnif(n = 20,d = 2,r = 1),
-                      maxdimension = 1,maxscale = 2)
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,size = 20),],
+                      dim = 1,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,size = 20),],
+                      dim = 1,threshold = 2)
 
   # calculate 2-wasserstein distance between D1 and D2 in dimension 1
   diagram_distance(D1,D2,dim = 1,p = 2,distance = "wasserstein")
@@ -71,7 +71,9 @@ if(require("TDA"))
   diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1)
   
   # repeat but with fast approximation
+  \dontrun{
   diagram_distance(D1,D2,dim = 1,distance = "fisher",sigma = 1,rho = 0.001)
+  }
 }
 }
 \references{

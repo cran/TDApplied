@@ -3,7 +3,7 @@
 #'
 #' Returns the persistence Fisher kernel value between a pair of persistence diagrams
 #' in a particular homological dimension, each of which is either the output from a \code{\link{diagram_to_df}} 
-#' function call or from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}.
+#' function call or from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}.
 #'
 #' The persistence Fisher kernel is calculated from the Fisher information metric according to the formula
 #' \eqn{k_{PF}(D_1,D_2) = exp(-t*d_{FIM}(D_1,D_2))}, resembling a radial basis kernel for standard
@@ -25,13 +25,13 @@
 #' Murphy, K. "Machine learning: a probabilistic perspective", MIT press (2012).
 #' @examples
 #'
-#' if(require("TDA"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDA::ripsDiag(TDA::circleUnif(n = 20,r = 1),
-#'                       maxdimension = 1,maxscale = 2)
-#'   D2 <- TDA::ripsDiag(TDA::sphereUnif(n = 20,d = 2,r = 1),
-#'                       maxdimension = 1,maxscale = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #' 
 #'   # calculate the kernel value between D1 and D2 with sigma = 2, t = 2 in dimension 1
 #'   diagram_kernel(D1,D2,dim = 1,sigma = 2,t = 2)
@@ -60,7 +60,7 @@ diagram_kernel <- function(D1,D2,dim = 0,sigma = 1,t = 1,rho = NULL){
 #' Gram matrices are used in downstream analyses, like in the `diagram_kkmeans`, `diagram_nearest_cluster`,`diagram_kpca`, 
 #' `predict_diagram_kpca`, `predict_diagram_ksvm` and `independence_test` functions.
 #'
-#' @param diagrams a list of persistence diagrams, where each diagram is either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param diagrams a list of persistence diagrams, where each diagram is either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param other_diagrams either NULL (default) or another list of persistence diagrams to compute a cross-Gram matrix.
 #' @param dim the non-negative integer homological dimension in which the distance is to be computed, default 0.
 #' @param sigma a positive number representing the bandwidth for the Fisher information metric, default 1.
@@ -74,13 +74,13 @@ diagram_kernel <- function(D1,D2,dim = 0,sigma = 1,t = 1,rho = NULL){
 #' @author Shael Brown - \email{shaelebrown@@gmail.com}
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-#'                                      dim = 0,threshold = 2)
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+#'                       dim = 1,threshold = 2)
 #'   g <- list(D1,D2)
 #'
 #'   # calculate the Gram matrix in dimension 0 with sigma = 2, t = 2

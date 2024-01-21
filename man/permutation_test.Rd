@@ -21,7 +21,7 @@ permutation_test(
 )
 }
 \arguments{
-\item{...}{lists of persistence diagrams which are either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Each list must contain at least 2 diagrams.}
+\item{...}{lists of persistence diagrams which are either the output of persistent homology calculations like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Each list must contain at least 2 diagrams.}
 
 \item{iterations}{the number of iterations for permuting group labels, default 20.}
 
@@ -83,12 +83,12 @@ then the sum of the elements of `group_sizes` must equal the number of rows and 
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create two groups of diagrams
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
   g1 <- list(D1,D2)
   g2 <- list(D1,D2)

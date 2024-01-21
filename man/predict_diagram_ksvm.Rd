@@ -12,7 +12,7 @@ predict_diagram_ksvm(
 )
 }
 \arguments{
-\item{new_diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.}
+\item{new_diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.}
 
 \item{model}{the output of a \code{\link{diagram_ksvm}} function call, of class 'diagram_ksvm'.}
 
@@ -31,21 +31,21 @@ This function is a wrapper of the kernlab \code{\link{predict}} function.
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create four diagrams
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
-  D3 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
-  D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
   g <- list(D1,D2,D3,D4)
 
   # create response vector
-  y <- as.factor(c("circle","sphere","circle","sphere"))
+  y <- as.factor(c("circle","circle","sphere","sphere"))
 
   # fit model without cross validation
   model_svm <- diagram_ksvm(diagrams = g,cv = 1,dim = c(0),
@@ -53,16 +53,13 @@ if(require("TDA") & require("TDAstats"))
                             num_workers = 2)
 
   # create two new diagrams
-  D5 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
-  D6 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
-                                     dim = 0,threshold = 2)
+  D5 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D6 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
   g_new <- list(D5,D6)
 
-  # predict
-  predict_diagram_ksvm(new_diagrams = g_new,model = model_svm,num_workers = 2)
-  
-  # repeat with precomputed Gram matrix, gives same result just much faster
+  # predict with precomputed Gram matrix
   K <- gram_matrix(diagrams = g_new,other_diagrams = model_svm$diagrams,
                    dim = model_svm$best_model$dim,sigma = model_svm$best_model$sigma,
                    t = model_svm$best_model$t,num_workers = 2)

@@ -17,13 +17,6 @@ lines(summary_table_approx$n_row[summary_table_approx$method=="Approximation"],
       col=2, type="b")
 legend(x = 200,y = 350,legend = c("Approximation","Exact"),
        col = c("red","black"),lty = c(1,1),cex = 0.8)
-arrows(summary_table_approx$n_row[summary_table_approx$method == "Approximation"],
-       summary_table_approx$mean[summary_table_approx$method == "Approximation"]
-       -1.96*summary_table_approx$sd[summary_table_approx$method == "Approximation"]/sqrt(10),
-       summary_table_approx$n_row[summary_table_approx$method == "Approximation"],
-       summary_table_approx$mean[summary_table_approx$method == "Approximation"]
-       +1.96*summary_table_approx$sd[summary_table_approx$method == "Approximation"]/sqrt(10),
-       length=0.05, angle=90, code=3,col = "red")
 arrows(summary_table_approx$n_row[summary_table_approx$method == "Exact"],
        summary_table_approx$mean[summary_table_approx$method == "Exact"]
        -1.96*summary_table_approx$sd[summary_table_approx$method == "Exact"]/sqrt(10),
@@ -299,7 +292,6 @@ plot(summary_table$n_row[summary_table$package=="TDA"], summary_table$mean[summa
      xlim=range(summary_table$n_row), ylim=range(0,summary_table$mean+1.96*summary_table$sd/sqrt(10)),xlab = "Points in shape",ylab = "Mean execution time (sec)",col = "darkgreen")
 lines(summary_table$n_row[summary_table$package=="TDApplied"], summary_table$mean[summary_table$package=="TDApplied"], col=2, type="b")
 legend(x = 200,y = 2000,legend = c("TDApplied","TDA"),col = c("red","darkgreen"),lty = c(1,1),cex = 0.8)
-arrows(summary_table$n_row[summary_table$package == "TDApplied"], summary_table$mean[summary_table$package == "TDApplied"]-1.96*summary_table$sd[summary_table$package == "TDApplied"]/sqrt(10), summary_table$n_row[summary_table$package == "TDApplied"], summary_table$mean[summary_table$package == "TDApplied"]+1.96*summary_table$sd[summary_table$package == "TDApplied"]/sqrt(10), length=0.05, angle=90, code=3,col = "red")
 arrows(summary_table$n_row[summary_table$package == "TDA"], summary_table$mean[summary_table$package == "TDA"]-1.96*summary_table$sd[summary_table$package == "TDA"]/sqrt(10), summary_table$n_row[summary_table$package == "TDA"], summary_table$mean[summary_table$package == "TDA"]+1.96*summary_table$sd[summary_table$package == "TDA"]/sqrt(10), length=0.05, angle=90, code=3,col = "darkgreen")
 
 ## ----echo = F,eval = F--------------------------------------------------------
@@ -320,7 +312,6 @@ lines(summary_table$n_row[summary_table$package=="TDApplied"], summary_table$mea
 lines(summary_table$n_row[summary_table$package=="persim"], summary_table$mean[summary_table$package=="persim"], col="darkorange", type="b")
 legend(x = 200,y = 20,legend = c("TDApplied","persim"),col = c("red","darkorange"),lty = c(1,1),cex = 0.8)
 arrows(summary_table$n_row[summary_table$package == "TDApplied"], summary_table$mean[summary_table$package == "TDApplied"]-1.96*summary_table$sd[summary_table$package == "TDApplied"]/sqrt(10), summary_table$n_row[summary_table$package == "TDApplied"], summary_table$mean[summary_table$package == "TDApplied"]+1.96*summary_table$sd[summary_table$package == "TDApplied"]/sqrt(10), length=0.05, angle=90, code=3,col = "red")
-arrows(summary_table$n_row[summary_table$package == "persim"], summary_table$mean[summary_table$package == "persim"]-1.96*summary_table$sd[summary_table$package == "persim"]/sqrt(10), summary_table$n_row[summary_table$package == "persim"], summary_table$mean[summary_table$package == "persim"]+1.96*summary_table$sd[summary_table$package == "persim"]/sqrt(10), length=0.05, angle=90, code=3,col = "darkorange")
 
 ## ----echo = F,eval = F--------------------------------------------------------
 #  model <- stats::lm(data = data.frame(ratio =

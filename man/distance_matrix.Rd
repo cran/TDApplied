@@ -16,7 +16,7 @@ distance_matrix(
 )
 }
 \arguments{
-\item{diagrams}{a list of persistence diagrams, either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
+\item{diagrams}{a list of persistence diagrams, either the output of persistent homology calculations like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
 \item{other_diagrams}{either NULL (default) or another list of persistence diagrams to compute a cross-distance matrix.}
 
@@ -49,23 +49,18 @@ contain many points and when the number of available cores is small.
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create two diagrams
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
   g <- list(D1,D2)
 
   # calculate their distance matrix in dimension 0 with the persistence Fisher metric
   # using 2 cores
   D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,num_workers = 2)
-  
-  # calculate their distance matrix in dimension 0 with the approximate persistence Fisher metric
-  # using 2 cores
-  D <- distance_matrix(diagrams = g,dim = 0,distance = "fisher",sigma = 1,rho = 0.001,
-                       num_workers = 2)
 
   # calculate their distance matrix in dimension 0 with the 2-wasserstein metric 
   # using 2 cores

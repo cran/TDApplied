@@ -12,7 +12,7 @@ predict_diagram_kpca(
 )
 }
 \arguments{
-\item{new_diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.}
+\item{new_diagrams}{a list of persistence diagrams which are either the output of a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Only one of `new_diagrams` and `K` need to be supplied.}
 
 \item{K}{an optional precomputed cross-Gram matrix of the new diagrams and the ones used in `embedding`, default NULL. If not NULL then `new_diagrams` does not need to be supplied.}
 
@@ -29,42 +29,40 @@ previously-computed kernel PCA embedding (from the \code{\link{diagram_kpca}} fu
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create six diagrams
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-                                     dim = 1,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-                                     dim = 1,threshold = 2)
-  D3 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-                                     dim = 1,threshold = 2)
-  D4 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
-                                     dim = 1,threshold = 2)
-  D5 <- TDAstats::calculate_homology(TDA::sphereUnif(n = 50,d = 2,r = 1),
-                                     dim = 1,threshold = 2)
-  D6 <- TDAstats::calculate_homology(TDA::torusUnif(n = 50,a = 0.25,c = 0.75),
-                                     dim = 1,threshold = 2)
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D3 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D4 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D5 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
+  D6 <- TDAstats::calculate_homology(TDAstats::sphere3d[sample(1:100,20),],
+                      dim = 1,threshold = 2)
   g <- list(D1,D2,D3,D4,D5,D6)
 
   # calculate their 2D PCA embedding with sigma = t = 2 in dimension 0
-  # using the approximate persistence Fisher metric
   pca <- diagram_kpca(diagrams = g,dim = 1,t = 2,sigma = 2,
-                      rho = 0.001,features = 2,num_workers = 2,
-                      th = 1e-6)
+                      features = 2,num_workers = 2,th = 1e-6)
 
   # project two new diagrams onto old model
-  D7 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
+  D7 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,50),],
                                      dim = 0,threshold = 2)
-  D8 <- TDAstats::calculate_homology(TDA::circleUnif(n = 50,r = 1),
+  D8 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,50),],
                                      dim = 0,threshold = 2)
-  g_new <- list(D4,D5)
+  g_new <- list(D7,D8)
 
   # calculate new embedding coordinates
   new_pca <- predict_diagram_kpca(new_diagrams = g_new,embedding = pca,num_workers = 2)
   
   # repeat with precomputed Gram matrix, gives same result but much faster
   K <- gram_matrix(diagrams = g_new,other_diagrams = pca$diagrams,dim = pca$dim,
-                   t = pca$t,sigma = pca$sigma,rho = pca$rho,num_workers = 2)
+                   t = pca$t,sigma = pca$sigma,num_workers = 2)
   new_pca <- predict_diagram_kpca(K = K,embedding = pca,num_workers = 2)
 }
 }

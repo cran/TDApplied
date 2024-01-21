@@ -13,7 +13,7 @@ plot_diagram(
 )
 }
 \arguments{
-\item{D}{a persistence diagram, either outputted from either a persistent homology homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}} or from \code{\link{diagram_to_df}}, with
+\item{D}{a persistence diagram, either outputted from either a persistent homology homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}} or from \code{\link{diagram_to_df}}, with
 maximum dimension at most 12.}
 
 \item{title}{the character string plot title, default NULL.}
@@ -40,10 +40,10 @@ threshold will be plotted in their dimension's color, and in gray otherwise.
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create a sample diagram from the unit circle
-  df <- TDA::circleUnif(n = 50)
+  df <- TDAstats::circle2d[sample(1:100,50),]
   diag <- TDAstats::calculate_homology(df,threshold = 2)
 
   # plot without title

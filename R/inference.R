@@ -17,7 +17,7 @@
 #' so care should be taken to use the desired function when using TDApplied with TDAstats. If `dist_mats` is supplied
 #' then the sum of the elements of `group_sizes` must equal the number of rows and columns of each of its elements.
 #'
-#' @param ... lists of persistence diagrams which are either the output of persistent homology calculations like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Each list must contain at least 2 diagrams.
+#' @param ... lists of persistence diagrams which are either the output of persistent homology calculations like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}. Each list must contain at least 2 diagrams.
 #' @param iterations the number of iterations for permuting group labels, default 20.
 #' @param p a positive number representing the wasserstein power parameter, a number at least 1 (and Inf if using the bottleneck distance) and default 2.
 #' @param q  a finite number at least 1 for exponentiation in the Turner loss function, default 2.
@@ -55,12 +55,12 @@
 #' Abdallah H et al. (2021). "Statistical Inference for Persistent Homology applied to fMRI." \url{https://github.com/hassan-abdallah/Statistical_Inference_PH_fMRI/blob/main/Abdallah_et_al_Statistical_Inference_PH_fMRI.pdf}.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two groups of diagrams
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
 #'   g1 <- list(D1,D2)
 #'   g2 <- list(D1,D2)
@@ -336,8 +336,8 @@ permutation_test <- function(...,iterations = 20,p = 2,q = 2,dims = c(0,1),dist_
 #' The test is carried out with a parametric null distribution, making it much faster than non-parametric
 #' approaches. If all of the diagrams in either g1 or g2 are the same in some dimension, then some p-values may be NaN.
 #'
-#' @param g1 the first group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
-#' @param g2 the second group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param g1 the first group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
+#' @param g2 the second group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.
 #' @param dims a non-negative integer vector of the homological dimensions in which the test is to be carried out, default c(0,1).
 #' @param sigma a positive number representing the bandwidth for the Fisher information metric, default 1.
 #' @param rho an optional positive number representing the heuristic for Fisher information metric approximation, see \code{\link{diagram_distance}}. Default NULL. If supplied, calculation of Gram matrices is sequential.
@@ -368,21 +368,19 @@ permutation_test <- function(...,iterations = 20,p = 2,q = 2,dims = c(0,1),dist_
 #' Gretton A et al. (2007). "A Kernel Statistical Test of Independence." \url{https://proceedings.neurips.cc/paper/2007/file/d5cfead94f5350c12c322b5b664544c1-Paper.pdf}.
 #' @examples
 #'
-#' if(require("TDA") & require("TDAstats"))
+#' if(require("TDAstats"))
 #' {
 #'   # create two independent groups of diagrams of length 6, which
 #'   # is the minimum length
-#'   D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
-#'   D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+#'   D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
 #'                                      dim = 0,threshold = 2)
 #'   g1 <- list(D1,D2,D2,D2,D2,D2)
 #'   g2 <- list(D2,D1,D1,D1,D1,D1)
 #' 
-#'   # do independence test with sigma = t = 1 in dimension 0
-#'   indep_test <- independence_test(g1,g2,dims = c(0),num_workers = 2)
-#'   
-#'   # repeat with precomputed Gram matrices, gives same result just much faster
+#'   # do independence test with sigma = t = 1 in dimension 0, using
+#'   # precomputed Gram matrices
 #'   K = gram_matrix(diagrams = g1,dim = 0,t = 1,sigma = 1,num_workers = 2)
 #'   L = gram_matrix(diagrams = g2,dim = 0,t = 1,sigma = 1,num_workers = 2)
 #'   indep_test <- independence_test(Ks = list(K),Ls = list(L),dims = c(0))

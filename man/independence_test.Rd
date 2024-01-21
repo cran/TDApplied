@@ -18,9 +18,9 @@ independence_test(
 )
 }
 \arguments{
-\item{g1}{the first group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
+\item{g1}{the first group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
-\item{g2}{the second group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like \code{\link[TDA]{ripsDiag}}/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
+\item{g2}{the second group of persistence diagrams, where each diagram was either the output from a persistent homology calculation like ripsDiag/\code{\link[TDAstats]{calculate_homology}}/\code{\link{PyH}}, or \code{\link{diagram_to_df}}.}
 
 \item{dims}{a non-negative integer vector of the homological dimensions in which the test is to be carried out, default c(0,1).}
 
@@ -64,21 +64,19 @@ approaches. If all of the diagrams in either g1 or g2 are the same in some dimen
 }
 \examples{
 
-if(require("TDA") & require("TDAstats"))
+if(require("TDAstats"))
 {
   # create two independent groups of diagrams of length 6, which
   # is the minimum length
-  D1 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D1 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
-  D2 <- TDAstats::calculate_homology(TDA::circleUnif(n = 10,r = 1),
+  D2 <- TDAstats::calculate_homology(TDAstats::circle2d[sample(1:100,10),],
                                      dim = 0,threshold = 2)
   g1 <- list(D1,D2,D2,D2,D2,D2)
   g2 <- list(D2,D1,D1,D1,D1,D1)
 
-  # do independence test with sigma = t = 1 in dimension 0
-  indep_test <- independence_test(g1,g2,dims = c(0),num_workers = 2)
-  
-  # repeat with precomputed Gram matrices, gives same result just much faster
+  # do independence test with sigma = t = 1 in dimension 0, using
+  # precomputed Gram matrices
   K = gram_matrix(diagrams = g1,dim = 0,t = 1,sigma = 1,num_workers = 2)
   L = gram_matrix(diagrams = g2,dim = 0,t = 1,sigma = 1,num_workers = 2)
   indep_test <- independence_test(Ks = list(K),Ls = list(L),dims = c(0))
