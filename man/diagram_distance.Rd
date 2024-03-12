@@ -41,7 +41,7 @@ in a particular homological dimension.
 The most common distance calculations between persistence diagrams
 are the wasserstein and bottleneck distances, both of which "match" points between
 their two input diagrams and compute the "loss" of the optimal matching 
-(see \url{http://www.geometrie.tugraz.at/kerber/kerber_papers/kmn-ghtcpd_journal.pdf} for details). Another 
+(see \url{https://dl.acm.org/doi/10.1145/3064175} for details). Another 
 method for computing distances, the Fisher information metric, 
 converts the two diagrams into distributions
 defined on the plane, and calculates a distance between the resulting two distributions
@@ -77,11 +77,14 @@ if(require("TDAstats"))
 }
 }
 \references{
-Kerber M, Morozov D and Nigmetov A (2017). "Geometry Helps to Compare Persistence Diagrams." \url{http://www.geometrie.tugraz.at/kerber/kerber_papers/kmn-ghtcpd_journal.pdf}.
+Kerber M, Morozov D and Nigmetov A (2017). "Geometry Helps to Compare Persistence Diagrams." \url{https://dl.acm.org/doi/10.1145/3064175}.
 
 Le T, Yamada M (2018). "Persistence fisher kernel: a riemannian manifold kernel for persistence diagrams." \url{https://proceedings.neurips.cc/paper/2018/file/959ab9a0695c467e7caf75431a872e5c-Paper.pdf}.
 
 Vlad I. Morariu, Balaji Vasan Srinivasan, Vikas C. Raykar, Ramani Duraiswami, and Larry S. Davis. Automatic online tuning for fast Gaussian summation. Advances in Neural Information Processing Systems (NIPS), 2008.
+}
+\seealso{
+\code{\link{distance_matrix}} for distance matrix calculations.
 }
 \author{
 Shael Brown - \email{shaelebrown@gmail.com}

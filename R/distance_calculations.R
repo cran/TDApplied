@@ -8,7 +8,7 @@
 #' The most common distance calculations between persistence diagrams
 #' are the wasserstein and bottleneck distances, both of which "match" points between
 #' their two input diagrams and compute the "loss" of the optimal matching 
-#' (see \url{http://www.geometrie.tugraz.at/kerber/kerber_papers/kmn-ghtcpd_journal.pdf} for details). Another 
+#' (see \url{https://dl.acm.org/doi/10.1145/3064175} for details). Another 
 #' method for computing distances, the Fisher information metric, 
 #' converts the two diagrams into distributions
 #' defined on the plane, and calculates a distance between the resulting two distributions
@@ -32,8 +32,9 @@
 #' @import Rcpp
 #' @export
 #' @author Shael Brown - \email{shaelebrown@@gmail.com}
+#' @seealso \code{\link{distance_matrix}} for distance matrix calculations.
 #' @references
-#' Kerber M, Morozov D and Nigmetov A (2017). "Geometry Helps to Compare Persistence Diagrams." \url{http://www.geometrie.tugraz.at/kerber/kerber_papers/kmn-ghtcpd_journal.pdf}.
+#' Kerber M, Morozov D and Nigmetov A (2017). "Geometry Helps to Compare Persistence Diagrams." \url{https://dl.acm.org/doi/10.1145/3064175}.
 #' 
 #' Le T, Yamada M (2018). "Persistence fisher kernel: a riemannian manifold kernel for persistence diagrams." \url{https://proceedings.neurips.cc/paper/2018/file/959ab9a0695c467e7caf75431a872e5c-Paper.pdf}.
 #' 
@@ -330,6 +331,7 @@ diagram_distance <- function(D1,D2,dim = 0,p = 2,distance = "wasserstein",sigma 
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel stopImplicitCluster
 #' @importFrom iterators iter
+#' @seealso \code{\link{diagram_distance}} for individual distance calculations.
 #' @examples
 #'
 #' if(require("TDAstats"))
