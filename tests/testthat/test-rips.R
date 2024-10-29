@@ -158,7 +158,7 @@ test_that("vr_graphs can detect incorrect parameters properly",{
 #   layout <- plot_vr_graph(comp,eps = 0.5*min_death_H0,return_layout = T,plot_isolated_vertices = T,component_of = 1)
 #   expect_equal(nrow(layout),1)
 #   layout <- plot_vr_graph(comp,eps = (loop_birth + loop_death)/2,return_layout = T,component_of = 1)
-#   expect_equal(nrow(layout),25)
+#   expect_lte(nrow(layout),25)
 #   rownames(df) <- paste("V",1:25,sep = "")
 #   comp <- vr_graphs(X = df,eps = c(0.5*min_death_H0,(loop_birth + loop_death)/2))
 #   layout <- plot_vr_graph(comp,eps = 0.5*min_death_H0,return_layout = T,plot_isolated_vertices = T)

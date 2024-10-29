@@ -167,3 +167,101 @@ test_that("independence_test is working",{
   expect_equal(independence_test(g1 = list(D1,D1,D1,D1,D1,D3),g2 = list(D2,D2,D2,D2,D2,D3),dims = c(0),num_workers = 2)$p_values[[1]],stats::pgamma(q = HSIC,rate = mu/v,shape = mu^2/v,lower.tail = F))
   
 })
+
+# test_that("universal_null can detect incorrect parameters",{
+# 
+#     skip_if_not_installed("TDA")
+#     skip_if_not_installed("TDAstats")
+# 
+#     library(TDA)
+# 
+#     # X, FUN_diag, maxdim, thresh, distance_mat, ripser, ignore_infinite_cluster, calculate_representatives, alpha, return_pvals, infinite_cycle_inference
+#     expect_error(universal_null(data.frame(),maxdim = 1,thresh = 2),"X")
+#     expect_error(universal_null(data.frame(x = 1),maxdim = 1,thresh = 2),"X")
+#     expect_error(universal_null(data.frame(x = c(1,2),y = c("1","2")),maxdim = 1,thresh = 2),"X")
+#     expect_error(universal_null(X = NULL,maxdim = 1,thresh = 2),"X")
+#     expect_error(universal_null(X = data.frame(x = c(1,NA)),maxdim = 1,thresh = 2),"missing")
+#     expect_error(universal_null(data.frame(x = c(1),y = c(2)),maxdim = 1,thresh = 2),"two")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculatehomology",maxdim = 1,thresh = 2),"calculate_homology")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = NULL,maxdim = 1,thresh = 2),"NULL")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = 2,maxdim = 1,thresh = 2),"string")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = 1.1,thresh = 2),"whole")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = NA,thresh = 2),"NA")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = -1,thresh = 2),"negative")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = 1,thresh = 0),"positive")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = 1,thresh = NaN),"NaN")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),maxdim = 1,thresh = "2"),"numeric")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,distance_mat = "F"),"logical")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,distance_mat = c(F,T)),"single")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,distance_mat = NULL),"NULL")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,distance_mat = NA),"NA")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,distance_mat = T),"square")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,return_pvals = "F"),"logical")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,return_pvals = c(F,T)),"single")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,return_pvals = NULL),"NULL")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,return_pvals = NA),"NA")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,calculate_representatives = c(T,F)),"boolean")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,calculate_representatives = NULL),"NULL")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,calculate_representatives = NA),"NA")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,alpha = NA),"NA")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,alpha = 2),"1")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,alpha = c(0.5,0.4)),"single")
+# 
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "ripsDiag",maxdim = 1,thresh = 2,infinite_cycle_inference = c(T,F)),"boolean")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,infinite_cycle_inference = NULL),"NULL")
+#     expect_error(universal_null(data.frame(x = 1:10,y = 1:10),FUN_diag = "calculate_homology",maxdim = 1,thresh = 2,infinite_cycle_inference = NA),"NA")
+# 
+# })
+
+# test_that("universal_null is working properly",{
+# 
+#   theta <- runif(n = 100, min = 0,max = 2*3.14)
+#   x <- cos(theta)
+#   y <- sin(theta)
+#   circ <- data.frame(x = x,y = y)
+#   res <- universal_null(circ, maxdim = 1, thresh = 2)
+#   expect_equal(nrow(res$subsetted_diag), 0) # when there is only one feature, same for TDA::sphereUnif
+# 
+#   circ$x <- circ$x + rnorm(n = 100,sd = 0.1)
+#   circ$y <- circ$y + rnorm(n = 100,sd = 0.1)
+#   res <- universal_null(circ, maxdim = 1, thresh = 2,alpha = 0.1) # with enough leeway
+#   expect_equal(nrow(res$subsetted_diag), 1L)
+#   expect_equal(res$subsetted_diag[1,1L], 1) # dim 1
+# 
+#   # now trying with and without infinite cycle inference at a smaller radius
+#   res <- universal_null(circ, maxdim = 1, thresh = 1.1,alpha = 0.05)
+#   expect_equal(nrow(res$subsetted_diag), 0L)
+#   library(TDA)
+#   res <- universal_null(circ, FUN_diag = 'ripsDiag', maxdim = 1, thresh = 1.1,alpha = 0.05,infinite_cycle_inference = T)
+#   expect_equal(nrow(res$subsetted_diag), 1L)
+# 
+# })
+
+# test_that("universal_null subsets representatives properly",{
+#   
+#     # circle has only representative
+#     theta <- runif(n = 100, min = 0,max = 2*3.14)
+#     x <- cos(theta)
+#     y <- sin(theta)
+#     circ <- data.frame(x = x,y = y)
+#     circ$x <- circ$x + rnorm(n = 100,sd = 0.1)
+#     circ$y <- circ$y + rnorm(n = 100,sd = 0.1)
+#     library(TDA)
+#     res <- universal_null(circ, FUN_diag = "ripsDiag",maxdim = 1, thresh = 2,alpha = 0.1,calculate_representatives = TRUE,return_pvals = TRUE) # with enough leeway
+#     expect_equal(length(res$subsetted_representatives),1L)
+#     expect_equal(length(res$pvals),1L)
+#     
+#     # circle with infinite cycle still has one representative
+#     res2 <- universal_null(circ, FUN_diag = "ripsDiag",maxdim = 1, thresh = 1.1,alpha = 0.1,calculate_representatives = TRUE,infinite_cycle_inference = TRUE,return_pvals = TRUE) # with enough leeway
+#     expect_equal(length(res2$subsetted_representatives),0L)
+#     expect_equal(length(res2$pvals),1L)
+#     
+# })
+

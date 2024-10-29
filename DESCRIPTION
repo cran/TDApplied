@@ -1,7 +1,7 @@
 Package: TDApplied
 Type: Package
 Title: Machine Learning and Inference for Topological Data Analysis
-Version: 3.0.3
+Version: 3.0.4
 Authors@R: c(person("Shael", "Brown", email = "shaelebrown@gmail.com", role = c("aut","cre")),
              person("Dr. Reza", "Farivar", email = "reza.farivar@mcgill.ca", role = c("aut","fnd")))
 Author: Shael Brown [aut, cre],
@@ -21,12 +21,12 @@ URL: https://github.com/shaelebrown/TDApplied
 BugReports: https://github.com/shaelebrown/TDApplied/issues
 Encoding: UTF-8
 NeedsCompilation: yes
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
 Suggests: rmarkdown, knitr, testthat (>= 3.0.0), TDAstats, reticulate,
-        igraph
+        TDA, igraph
 LinkingTo: Rcpp
 VignetteBuilder: knitr, rmarkdown
 Config/testthat/edition: 3
-Packaged: 2024-03-12 22:37:01 UTC; jibaccount
+Packaged: 2024-10-28 13:18:16 UTC; jibaccount
 Repository: CRAN
-Date/Publication: 2024-03-12 23:00:02 UTC
+Date/Publication: 2024-10-29 08:30:02 UTC

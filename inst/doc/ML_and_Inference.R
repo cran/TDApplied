@@ -83,6 +83,24 @@ plot(x = circ$x,y = circ$y,xlab = "x",ylab = "y",main = "circ")
 diag <- data.frame(dimension = c(rep(0,50),1),birth = c(rep(0,50),0.5579783),death = c(0.0123064760118723,0.0144490944221616,0.0149910748004913,0.0156172784045339,0.0172923970967531,0.0189713705331087,0.0196240246295929,0.0225948672741652,0.0286996569484472,0.0365069359540939,0.038569450378418,0.0386403761804104,0.0444764532148838,0.0477333702147007,0.0612373314797878,0.0639129132032394,0.0699725300073624,0.0705153122544289,0.0721508488059044,0.0791449695825577,0.0858016163110733,0.0872511267662048,0.0882881134748459,0.0893174782395363,0.0925402045249939,0.0944025367498398,0.0944980531930923,0.099234826862812,0.117955945432186,0.120451688766479,0.126571387052536,0.139067515730858,0.142296731472015,0.148265853524208,0.158034011721611,0.181465998291969,0.188804805278778,0.19113427400589,0.20612421631813,0.21517525613308,0.228875741362572,0.233790531754494,0.235128790140152,0.242270082235336,0.244500055909157,0.245646774768829,0.254552245140076,0.281323730945587,0.288743227720261,2,1.73859250545502))
 diag[47:51,]
 
+## ----echo=FALSE,fig.height = 5,fig.width = 5,fig.align = 'center'-------------
+theta <- stats::runif(n = 100,min = 0,max = 2*pi)
+x <- cos(theta)
+y <- sin(theta)
+origin <- data.frame(x = 0,y = 0)
+new_data <- rbind(data.frame(x = x,y = y), origin)
+layout <- as.matrix(new_data)
+rownames(layout) <- as.character(1:nrow(new_data))
+vrs <- vr_graphs(new_data, eps = c(0.0001,1))
+plot_vr_graph(vrs, eps = (0.0001), layout = layout, plot_isolated_vertices = TRUE,vertex_labels = FALSE)
+
+## -----------------------------------------------------------------------------
+enc_rad <- enclosing_radius(new_data, distance_mat = FALSE)
+print(enc_rad)
+
+## ----echo = FALSE,fig.height = 5,fig.width = 5,fig.align = 'center'-----------
+plot_vr_graph(vrs, eps = enc_rad, layout = layout,vertex_labels = F)
+
 ## ----echo = T,eval = F--------------------------------------------------------
 #  # convert TDA diagram into data frame
 #  diag1 <- TDA::ripsDiag(circ,maxdimension = 1,maxscale = 2,library = "dionysus")
@@ -199,6 +217,44 @@ diagram_kernel(D1,D3,dim = 0,sigma = 2,t = 2)
 
 ## ----echo = T,fig.height = 5,fig.width = 5,fig.align = 'center'---------------
 plot_diagram(diag,title = "Circle diagram")
+
+## -----------------------------------------------------------------------------
+# determine significant features
+circ_result <- universal_null(circ,
+                                   thresh = enclosing_radius(circ))
+circ_result$subsetted_diag
+
+## ----echo = T,fig.height = 5,fig.width = 5,fig.align = 'center',eval = requireNamespace("TDA")----
+# create circle with noise dataset and plot
+circ_with_noise <- circ
+x_noise <- stats::rnorm(n = 50,sd = 0.1)
+y_noise <- stats::rnorm(n = 50,sd = 0.1)
+circ_with_noise$x <- circ_with_noise$x + x_noise
+circ_with_noise$y <- circ_with_noise$y + y_noise
+plot(circ_with_noise)
+
+# rerun the inference procedure
+library(TDA)
+noisy_circ_result <- universal_null(circ_with_noise, 
+                                         FUN_diag = "ripsDiag",
+                                         thresh = enclosing_radius(circ_with_noise),
+                                         return_pvals = TRUE)
+noisy_circ_result$subsetted_diag
+noisy_circ_result$pvals
+
+## ----eval = requireNamespace("TDA")-------------------------------------------
+# inference without infinite cycle inference
+res_non_inf_small_thresh <- universal_null(circ_with_noise,
+                                           FUN_diag = "ripsDiag",
+                                           thresh = 0.9)
+res_non_inf_small_thresh$subsetted_diag
+
+# inference with infinite cycle inference
+res_inf_small_thresh <- universal_null(circ_with_noise,
+                                       FUN_diag = "ripsDiag",
+                                       thresh = 0.9,
+                                       infinite_cycle_inference = TRUE)
+res_inf_small_thresh$subsetted_diag
 
 ## ----echo = F,fig.height = 5,fig.width = 5,fig.align = 'center',eval = requireNamespace("TDAstats") & requireNamespace("TDA")----
 par(mfrow = c(1,1))
@@ -367,7 +423,12 @@ gs <- vr_graphs(X = circ,eps = c(eps_1,eps_2))
 plot_vr_graph(gs,eps_1)
 
 # plot second graph
-plot_vr_graph(gs,eps_2)
+layout <- plot_vr_graph(gs,eps_2,return_layout = TRUE)
+layout <- apply(layout,MARGIN = 2,FUN = function(X){
+  
+  return(-1 + 2*(X - min(X))/(max(X) - min(X)))
+  
+})
 
 ## ----eval = requireNamespace('igraph'),echo = F,fig.width = 5,fig.align = 'center'----
 # get the stimuli in the loop
@@ -379,18 +440,14 @@ colors <- rep("lightblue",50)
 colors[stimuli_in_loop] <- "red"
 
 # plot only component containing the loop stimuli with vertex colors
-plot_vr_graph(gs,eps_2,cols = colors,component_of = stimuli_in_loop[[1]])
+plot_vr_graph(gs,eps_2,cols = colors,component_of = stimuli_in_loop[[1]],layout = layout)
 
 ## ----eval = requireNamespace('igraph'),fig.width = 5,fig.align = 'center'-----
 # plot only component containing the loop stimuli with vertex colors
-layout <- plot_vr_graph(gs,eps_2,cols = colors,
-                component_of = stimuli_in_loop[[1]],
-                vertex_labels = F,return_layout = T)
-layout <- apply(layout,MARGIN = 2,FUN = function(X){
-  
-  return(-1 + 2*(X - min(X))/(max(X) - min(X)))
-  
-})
+plot_vr_graph(gs,eps_2,cols = colors,
+              component_of = stimuli_in_loop[[1]],
+              vertex_labels = FALSE,
+              layout = layout)
 
 # get indices of vertices in loop
 # not necessary in this case but necessary when we have
@@ -499,12 +556,59 @@ g2 <- generate_TDApplied_vignette_data(0,10,0)
 indep_test <- independence_test(g1,g2,dims = c(0),num_workers = 2)
 indep_test$p_values
 
+## ----echo = F,fig.height = 3,fig.width = 6,fig.align = 'center'---------------
+# plot
+par(mfrow = c(1,2))
+plot(x = circ[,1],y = circ[,2],main = "circ",xlab = "",ylab = "",las = 1)
+theta <- stats::runif(n = 50,min = 0,max = 2*pi)
+circ2 <- data.frame(x = cos(theta),y = sin(theta))
+plot(x = circ2[,1],y = circ2[,2],main = "circ2",xlab = "",ylab = "",las = 1)
+
+## -----------------------------------------------------------------------------
+mod_comp <- permutation_model_inference(circ, circ2, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        num_workers = 2L)
+mod_comp$p_values
+
+## ----echo = F,fig.height = 3,fig.width = 6,fig.align = 'center'---------------
+# plot
+par(mfrow = c(1,2))
+plot(x = circ[,1],y = circ[,2],main = "circ",xlab = "",ylab = "",las = 1)
+circ_noise <- data.frame(x = circ[,1] + rnorm(50,sd = 0.01),y = circ[,2] + rnorm(50,sd = 0.01))
+plot(x = circ_noise[,1],y = circ_noise[,2],main = "circ_noise",xlab = "",ylab = "",las = 1)
+
+## -----------------------------------------------------------------------------
+mod_comp_paired <- permutation_model_inference(circ, circ_noise, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        paired = TRUE, num_workers = 2L)
+mod_comp_paired$p_values
+
+## ----eval = F-----------------------------------------------------------------
+#  # in this case we are creating 3 samples of the rows of circ
+#  # (and equivalently the other two datasets)
+#  boot_samples <- lapply(X = 1:3,
+#                         FUN = function(X){return(unique(sample(1:nrow(circ),size = nrow(circ),replace = TRUE)))})
+#  
+#  # carry out three model comparisons between circ, circ2 and circ3
+#  mod_comp_1_2 <- permutation_model_inference(circ, circ2, iterations = 20,
+#                                          thresh = 2, num_samples = 3,
+#                                          paired = TRUE, num_workers = 2L,
+#                                          samp = boot_samples)
+#  mod_comp_1_3 <- permutation_model_inference(circ, circ3, iterations = 20,
+#                                          thresh = 2, num_samples = 3,
+#                                          paired = TRUE, num_workers = 2L,
+#                                          samp = boot_samples)
+#  mod_comp_2_3 <- permutation_model_inference(circ2, circ3, iterations = 20,
+#                                          thresh = 2, num_samples = 3,
+#                                          paired = TRUE, num_workers = 2L,
+#                                          samp = boot_samples)
+
 ## ----echo = T-----------------------------------------------------------------
 # create noisy copies of D1, D2 and D3
 g <- generate_TDApplied_vignette_data(3,3,3)
                               
-# calculate kmeans clusters with centers = 3, and sigma = t = 2
-clust <- diagram_kkmeans(diagrams = g,centers = 3,dim = 0,t = 2,sigma = 2,num_workers = 2)
+# calculate kmeans clusters with centers = 3, and sigma = t = 0.1
+clust <- diagram_kkmeans(diagrams = g,centers = 3,dim = 0,t = 0.1,sigma = 0.1,num_workers = 2)
 
 # display cluster labels
 clust$clustering@.Data

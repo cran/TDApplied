@@ -165,6 +165,39 @@ In the package vignette "Benchmarking and Speedups", simulations are used to dem
 
 Note that the installation status of Python for `PyH` is checked using the function `reticulate::py_available()`, which according to several online forums does not always behave as expected. If error messages occur using **TDApplied** functions regarding Python not being installed then we recommend consulting online resources to ensure that the `py_available` function returns `TRUE` on your system. Due to the complicated dependencies required to use the `PyH` function, it is only an optional function in the **TDApplied** package and therefore the reticulate package is only suggested in the **TDApplied** namespace.
 
+
+## Determining the Radius Threshold with **TDApplied**'s `enclosing_radius` Function
+
+One of the most important parameters in a persistent (co)homology calculation is the maximum connectivity radius of the filtration (which is the `maxdim` parameter in the `PyH` function). A small radius threshold may prematurely stop the filtration before we can identify real large-scale features of our data, while an overly large threshold could quickly cause the calculations to become intractable. While there is no method that can determine an optimal balance between these two extremes, a radius threshold exists, called the "enclosing radius", beyond which the topology of the dataset is trivial (i.e. there are no topological features except for one connected component). This radius is obtained by calculating, for each data point, the maximum distance from that point to all other points, and taking the minimum of these values.
+
+The enclosing radius of a dataset can be computed using **TDApplied**'s `enclosing_radius` function. Consider the topology of a dataset sampled from a circle and its origin:
+
+```{r, echo=FALSE,fig.height = 5,fig.width = 5,fig.align = 'center'}
+theta <- stats::runif(n = 100,min = 0,max = 2*pi)
+x <- cos(theta)
+y <- sin(theta)
+origin <- data.frame(x = 0,y = 0)
+new_data <- rbind(data.frame(x = x,y = y), origin)
+layout <- as.matrix(new_data)
+rownames(layout) <- as.character(1:nrow(new_data))
+vrs <- vr_graphs(new_data, eps = c(0.0001,1))
+plot_vr_graph(vrs, eps = (0.0001), layout = layout, plot_isolated_vertices = TRUE,vertex_labels = FALSE)
+```
+Without knowing anything about the structure of our new dataset we would not know which distance threshold to use for persistent homology calculations. We would compute the enclosing radius as follows:
+
+```{r}
+enc_rad <- enclosing_radius(new_data, distance_mat = FALSE)
+print(enc_rad)
+```
+
+This radius is the distance from the origin point to all the points on the circumference - at which point the whole graph is connected and the loop is gone:
+
+```{r,echo = FALSE,fig.height = 5,fig.width = 5,fig.align = 'center'}
+plot_vr_graph(vrs, eps = enc_rad, layout = layout,vertex_labels = F)
+```
+
+We will see in a later section how to construct these types of graphs using the `vr_graphs` and `plot_vr_graph` functions.
+
 ## Converting Diagrams to DataFrames with **TDApplied**'s `diagram_to_df` Function
 
 The most typical data structure used in R for data science is a data frame. The output of the `PyH` function is a data frame (unless representatives are calculated, in which case the output is a list containing a data frame and other information), but the persistence diagrams calculated from the popular R packages **TDA** [@R-TDA] and **TDAstats** [@R-TDAstats] are not stored in data frames, making subsequent machine learning and inference analyses of these diagrams challenging. Since In order to solve this problem the **TDApplied** function `diagram_to_df` can convert **TDA**/**TDAstats** persistence diagrams into data frames:
@@ -347,13 +380,82 @@ Persistence diagrams can contain any number of points representing different typ
 plot_diagram(diag,title = "Circle diagram")
 ```
 
-Now that we can visualize persistence diagrams we will describe three tools which can be used for their interpretation -- filtering out noisy topological features with bootstrapping, representative (co)cycles and *Vietoris-VR graphs* (called VR graphs for short).
+Now that we can visualize persistence diagrams we will describe four tools which can be used for their interpretation -- filtering out noisy topological features with the universal null distribution and bootstrapping methods, representative (co)cycles and *Vietoris-VR graphs* (called VR graphs for short).
+
+## Filtering Topological Features and **TDApplied**'s `universal_null` Function
+
+Noise in datasets can drastically affect the results of inference and machine learning procedures. Therefore it is desirable to clean data before applying such procedures. Noise in persistence diagrams are features whose birth and death values are very similar. The question of determining which points in a persistence diagrams are "significant" and which are "noise" has been recently addressed via a parametric approach in [@universal_null].
+
+The idea is to compute a test statistic for each feature based on the ratio of death divided by birth and to compare these statistics against the left-skewed Gumbel distribution to compute p-values, and use a Bonferroni correction to ensure that the probability of getting a false positive significant feature is at most $\alpha$. This is a very strict thresholding procedure, testing each p-value $p$ for a topological feature in dimension $i$ against $\alpha/n_i$ where $n_i$ is the number of topological features of that dimension (so typical choices for $\alpha$, like 0.05 or 0.01 etc., may be too strict for some analyses).
+
+We would be tempted to use this procedure to locate the main loop in our circ dataset, but the results are surprising:
+
+```{r}
+# determine significant features
+circ_result <- universal_null(circ,
+                                   thresh = enclosing_radius(circ))
+circ_result$subsetted_diag
+```
+
+No loop was found! The reason for this is because since circ is a "topologically perfect" dataset, with no noise and therefore only one loop, the singular loop can never be significant without smaller loops to compare it to. The same phenomenon will occur in other datasets like a sampled unit sphere, etc., but does this mean that the procedure does not work?
+
+Certainly not! All real world datasets will contain some measure of noise and therefore will likely have more than one feature in a given homological dimension. Let's add some noise to our unit_circ dataset and rerun the procedure:
+
+```{r,echo = T,fig.height = 5,fig.width = 5,fig.align = 'center',eval = requireNamespace("TDA")}
+# create circle with noise dataset and plot
+circ_with_noise <- circ
+x_noise <- stats::rnorm(n = 50,sd = 0.1)
+y_noise <- stats::rnorm(n = 50,sd = 0.1)
+circ_with_noise$x <- circ_with_noise$x + x_noise
+circ_with_noise$y <- circ_with_noise$y + y_noise
+plot(circ_with_noise)
+
+# rerun the inference procedure
+library(TDA)
+noisy_circ_result <- universal_null(circ_with_noise, 
+                                         FUN_diag = "ripsDiag",
+                                         thresh = enclosing_radius(circ_with_noise),
+                                         return_pvals = TRUE)
+noisy_circ_result$subsetted_diag
+noisy_circ_result$pvals
+```
+
+We have successfully found the significant loop in the noisy dataset (with p-value less than `alpha`). Remember though that this procedure is very strict - it is much more likely to disregard real topological features than to retain noise features, so if the `universal_null` function says that your dataset has no significant features when you are confident there are some you can try increasing the `alpha` parameter to carry out a more relaxed thresholding.
+
+While the `enclosing_radius` function, used in our examples, may be an appropriate connectivity threshold for most applications, it may be too computationally intensive for others. When lower thresholds are used, real topological features may be obscured because the threshold is much smaller than its (unobserved) death radius. Thankfully though, the `universal_null` procedure can handle these "infinite cycles", by:
+
+1. Using the left-skewed Gumbel distribution and `alpha` parameter to determine the minimum connectivity threshold for persistent homology where a given infinite cycle feature *might* be significant,
+2. Computing the persistence diagram at that threshold, and
+3. Checking if the feature is still infinite (i.e. if its death value is the new larger threshold). If yes then the feature is reported as being significant, otherwise it is filtered out.
+
+Picking a very small threshold, resulting in many infinite cycles, will be very computationally demanding requiring the computation of many persistence diagrams, so care should be taken when picking the threshold when performing this infinite cycle inference.
+
+Here's an example of performing inference on the noisy circ dataset, with and without infinite cycle inference at a lower threshold value:
+
+```{r,eval = requireNamespace("TDA")}
+# inference without infinite cycle inference
+res_non_inf_small_thresh <- universal_null(circ_with_noise,
+                                           FUN_diag = "ripsDiag",
+                                           thresh = 0.9)
+res_non_inf_small_thresh$subsetted_diag
+
+# inference with infinite cycle inference
+res_inf_small_thresh <- universal_null(circ_with_noise,
+                                       FUN_diag = "ripsDiag",
+                                       thresh = 0.9,
+                                       infinite_cycle_inference = TRUE)
+res_inf_small_thresh$subsetted_diag
+```
+
+At this smaller threshold the procedure with infinite cycle inference was able to locate the main loop.
+
+In a later section you will read about "representative (co)cycles", which are subsets of the datapoints on a topological feature that can be used to help locate the feature in our dataset, but for now just know that if desired this procedure will subset the representatives for only the significant topological features, but infinite cycles will not have representatives.
 
 ## Bootstrapping Topological Features and **TDApplied**'s `bootstrap_persistence_thresholds` Function
 
-Noise in datasets can drastically affect the results of inference and machine learning procedures. Therefore it is desirable to clean data before applying such procedures. Noise in persistence diagrams are low persistence topological features, i.e. features whose birth and death values are very similar (such points would be near the diagonal line when plotted). The question of determining which points in a persistence diagrams are "significant" and which are "noise" has been addressed via a bootstrapping approach in [@bootstrap].
+Another approach in the literature for filtering significant topological features of datasets was based on bootstrapping ([@bootstrap]), although this method is far slower than the aforementioned universal null distribution approach because it requires the computation of many persistence diagrams and distances. On the other hand, for topologically simple datasets without noise (like a sampled unit circle) the universal null distribution will often fail to retrieve the real topological features.
 
-The idea of the procedure is as follows, where $X$ is the input data set and $\alpha$ is the desired threshold for type 1 error:
+The idea of the bootstrap procedure is as follows, where $X$ is the input data set and $\alpha$ is the desired threshold for type 1 error:
 
 1. We first compute $D$, the diagram of $X$.
 2. Then we repeatedly sample, with replacement, the original data to obtain $\{X_1,\dots,X_n\}$ and compute new persistence diagrams $\{D_1,\dots,D_n\}$.
@@ -577,7 +679,12 @@ Next we can plot both VR graphs:
 plot_vr_graph(gs,eps_1)
 
 # plot second graph
-plot_vr_graph(gs,eps_2)
+layout <- plot_vr_graph(gs,eps_2,return_layout = TRUE)
+layout <- apply(layout,MARGIN = 2,FUN = function(X){
+  
+  return(-1 + 2*(X - min(X))/(max(X) - min(X)))
+  
+})
 ```
 
 The first graph shows that at a scale before the loop is born, the dominant loop does not exist in the data (and that the space is more fragmented), while the second graph was able to retrieve the dominant loop. Visualizing multiple VR graphs of a dataset, choosing particular scales of interest from the persistence diagram of the dataset, can be an effective tool for interpreting topological features.
@@ -594,21 +701,17 @@ colors <- rep("lightblue",50)
 colors[stimuli_in_loop] <- "red"
 
 # plot only component containing the loop stimuli with vertex colors
-plot_vr_graph(gs,eps_2,cols = colors,component_of = stimuli_in_loop[[1]])
+plot_vr_graph(gs,eps_2,cols = colors,component_of = stimuli_in_loop[[1]],layout = layout)
 ```
 
 We can customize one level further by removing the vertex labels and using the graph layout (i.e. x-y coordinates of all vertices) to plot other things on the graph:
 
 ```{r,eval = requireNamespace('igraph'),fig.width = 5,fig.align = 'center'}
 # plot only component containing the loop stimuli with vertex colors
-layout <- plot_vr_graph(gs,eps_2,cols = colors,
-                component_of = stimuli_in_loop[[1]],
-                vertex_labels = F,return_layout = T)
-layout <- apply(layout,MARGIN = 2,FUN = function(X){
-  
-  return(-1 + 2*(X - min(X))/(max(X) - min(X)))
-  
-})
+plot_vr_graph(gs,eps_2,cols = colors,
+              component_of = stimuli_in_loop[[1]],
+              vertex_labels = FALSE,
+              layout = layout)
 
 # get indices of vertices in loop
 # not necessary in this case but necessary when we have
@@ -662,12 +765,13 @@ These visualizations can help determine which points are part of a representativ
 
 # Hypothesis Testing
 
-Having visualized and interpreted our data of interest (persistence diagrams), a common next step in data analysis pipelines is to ask statistical questions in the form of hypothesis testing [@CasellaBerger]. Two such questions that we will focus on are:
+Having visualized and interpreted our data of interest (persistence diagrams), a common next step in data analysis pipelines is to ask statistical questions in the form of hypothesis testing [@CasellaBerger]. Three such questions that we will focus on are:
 
 1. Are groups of persistence diagrams different from each other?
 2. Are two groups of persistence diagrams independent of each other?
+3. Are two datasets good topological models of each other?
 
-In order to answer these questions we need to generate groups of persistence diagrams. We will generate diagrams which are random deviations of D1, D2 and D3 diagrams from earlier:
+In order to answer these questions we need to generate groups of persistence diagrams. For the third question we will generate diagrams from simulated circle datasets. For the first two questions we will generate diagrams which are random deviations of D1, D2 and D3 diagrams from earlier:
 
 ```{r,echo = F,fig.height = 3,fig.width = 7,fig.align = 'center'}
 par(mfrow = c(1,3))
@@ -788,6 +892,80 @@ indep_test$p_values
 
 The p-value of this test would not be significant at any typical significance threshold, reflecting the fact that there is no real (i.e. non-spurious) dependence between the two groups, as expected.
 
+
+## Model Inference and **TDApplied**'s `permutation_model_inference` Function
+
+The permutation test procedure allows us to test whether two groups of persistence diagrams are different, and the bootstrap procedure allows us to estimate the sampling distribution of the persistence diagram of a single dataset. Putting these two concepts together we can test whether two datasets are topologically similar or not, i.e. if each dataset is a good topological "model" of the other.
+
+The procedure we will employ is to
+
+1. compute two groups of bootstrapped persistence diagrams, one from each dataset, and 
+2. carry out a permutation test on the two groups.
+
+A small p-value in a given homological dimension of this test indicates that the two datasets had a significant topological difference in that dimension. Let's take an example of two datasets generated by a circle, our original `circ` and a new dataset `circ2`:
+
+```{r,echo = F,fig.height = 3,fig.width = 6,fig.align = 'center'}
+# plot
+par(mfrow = c(1,2))
+plot(x = circ[,1],y = circ[,2],main = "circ",xlab = "",ylab = "",las = 1)
+theta <- stats::runif(n = 50,min = 0,max = 2*pi)
+circ2 <- data.frame(x = cos(theta),y = sin(theta))
+plot(x = circ2[,1],y = circ2[,2],main = "circ2",xlab = "",ylab = "",las = 1)
+```
+
+When we run the model inference procedure we find that there is no topological difference (at the 0.05 significance level) in dimensions 0 or 1:
+
+```{r}
+mod_comp <- permutation_model_inference(circ, circ2, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        num_workers = 2L)
+mod_comp$p_values
+```
+
+Now suppose we knew there was a correspondence between the rows of the two datasets, for instance row $i$ in both datasets corresponded to the same subject in two studies. For a practical example consider the two datasets `circ` and `circ` with a small variance Gaussian noise source:
+
+```{r,echo = F,fig.height = 3,fig.width = 6,fig.align = 'center'}
+# plot
+par(mfrow = c(1,2))
+plot(x = circ[,1],y = circ[,2],main = "circ",xlab = "",ylab = "",las = 1)
+circ_noise <- data.frame(x = circ[,1] + rnorm(50,sd = 0.01),y = circ[,2] + rnorm(50,sd = 0.01))
+plot(x = circ_noise[,1],y = circ_noise[,2],main = "circ_noise",xlab = "",ylab = "",las = 1)
+```
+
+We can carry out a paired permutation test to obtain increased statistical power as follows:
+
+```{r}
+mod_comp_paired <- permutation_model_inference(circ, circ_noise, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        paired = TRUE, num_workers = 2L)
+mod_comp_paired$p_values
+```
+
+Once again the p-values are not significant. In general a high p-value only "suggests" a better model fit, but in this case we know that the two datasets are highly related.
+
+If we wanted to carry out multiple paired tests between datasets (for instance data from the same subjects across multiple studies) we can ensure that the same bootstrap samples are used in all comparisons by explicitly defining those samples and supplying them to the procedure. If we had defined another dataset, `circ3`, we could carry out the paired tests as follows:
+
+```{r,eval = F}
+# in this case we are creating 3 samples of the rows of circ
+# (and equivalently the other two datasets)
+boot_samples <- lapply(X = 1:3,
+                       FUN = function(X){return(unique(sample(1:nrow(circ),size = nrow(circ),replace = TRUE)))})
+
+# carry out three model comparisons between circ, circ2 and circ3
+mod_comp_1_2 <- permutation_model_inference(circ, circ2, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        paired = TRUE, num_workers = 2L,
+                                        samp = boot_samples)
+mod_comp_1_3 <- permutation_model_inference(circ, circ3, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        paired = TRUE, num_workers = 2L,
+                                        samp = boot_samples)
+mod_comp_2_3 <- permutation_model_inference(circ2, circ3, iterations = 20,
+                                        thresh = 2, num_samples = 3,
+                                        paired = TRUE, num_workers = 2L,
+                                        samp = boot_samples)
+```
+
 # Finding Latent Structure
 
 Patterns may exist in a collection of persistence diagrams. For example, if the collection contained diagrams from three distinct shapes then we would like to be able to assign three distinct (discrete) labels to the correct subsets of diagrams. On the other hand, maybe the diagrams vary along several dimensions, like the mean persistence of their loops and the mean persistence of their components. In this case we would like to be able to retrieve these continuous features for visualizing all diagrams in the same (2D in this example) space. These two types of analyses are called clustering and dimension reduction respectively, and are two of the most common and popular machine learning applications. We will explore three techniques from these areas - kernel k-means from clustering, and multidimensional scaling and kernel principal components analysis from dimension reduction.
@@ -800,8 +978,8 @@ Kernel k-means [@kkmeans] is a method which can find hidden groups in complex da
 # create noisy copies of D1, D2 and D3
 g <- generate_TDApplied_vignette_data(3,3,3)
                               
-# calculate kmeans clusters with centers = 3, and sigma = t = 2
-clust <- diagram_kkmeans(diagrams = g,centers = 3,dim = 0,t = 2,sigma = 2,num_workers = 2)
+# calculate kmeans clusters with centers = 3, and sigma = t = 0.1
+clust <- diagram_kkmeans(diagrams = g,centers = 3,dim = 0,t = 0.1,sigma = 0.1,num_workers = 2)
 
 # display cluster labels
 clust$clustering@.Data
